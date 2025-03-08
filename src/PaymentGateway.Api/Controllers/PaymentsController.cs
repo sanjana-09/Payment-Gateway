@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+
+using Microsoft.AspNetCore.Mvc;
 
 using PaymentGateway.Api.Models.Responses;
 using PaymentGateway.Api.Services;
@@ -21,6 +23,6 @@ public class PaymentsController : Controller
     {
         var payment = _paymentsRepository.Get(id);
 
-        return new OkObjectResult(payment);
+        return (payment is not null) ? new OkObjectResult(payment): new NotFoundObjectResult(payment);
     }
 }
