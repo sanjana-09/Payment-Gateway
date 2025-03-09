@@ -5,9 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NUnit.Framework;
 
-using PaymentGateway.Api.Controllers;
-using PaymentGateway.Api.Models.Responses;
-using PaymentGateway.Api.Services;
+using PaymentGateway.Api.Api.Controllers;
+using PaymentGateway.Api.Application.DTOs.Responses;
+using PaymentGateway.Api.Infrastructure;
 
 namespace PaymentGateway.Api.Tests;
 
