@@ -15,6 +15,7 @@ public class Payment
         Authorized = 1,
         Declined = 2,
         Pending = 3
+
     }
 
     public void Authorized() => Status = PaymentStatus.Authorized;

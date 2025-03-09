@@ -1,16 +1,11 @@
-﻿using System.Net;
-
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
-
 using Microsoft.AspNetCore.Mvc;
-
 using PaymentGateway.Api.Application;
 using PaymentGateway.Api.Application.DTOs.Enums;
 using PaymentGateway.Api.Application.DTOs.Requests;
 using PaymentGateway.Api.Application.DTOs.Responses;
 using PaymentGateway.Api.Domain.Interfaces;
-using PaymentGateway.Api.Infrastructure;
 
 namespace PaymentGateway.Api.Api.Controllers;
 
@@ -21,24 +16,25 @@ public class PaymentsController : Controller
     private readonly IPaymentService _paymentService;
     private readonly IValidator<PostPaymentRequest> _validator;
     private readonly IPaymentsRepository _paymentsRepository;
-    private readonly IHttpClientFactory _httpClientFactory;
 
     public PaymentsController(IPaymentService paymentService,
         IValidator<PostPaymentRequest> validator,
-        IPaymentsRepository paymentsRepository, 
-        IHttpClientFactory httpClientFactory)
+        IPaymentsRepository paymentsRepository)
     {
         _paymentService = paymentService;
         _validator = validator;
         _paymentsRepository = paymentsRepository;
-        _httpClientFactory = httpClientFactory; }
+    }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<PaymentResponse?>> GetPaymentAsync(Guid id)
     {
+        var paymentResponse = await _paymentService.Get(id);
         var payment = _paymentsRepository.Get(id);
 
-        return (payment != null) ? new OkObjectResult(payment): new NotFoundObjectResult(payment);
+        if (payment is null) return new NotFoundResult();
+
+        return new OkObjectResult(paymentResponse);
     }
 
     [HttpPost]

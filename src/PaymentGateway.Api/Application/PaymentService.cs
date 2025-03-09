@@ -1,4 +1,6 @@
-﻿using PaymentGateway.Api.Application.DTOs.Enums;
+﻿using Microsoft.AspNetCore.Mvc;
+
+using PaymentGateway.Api.Application.DTOs.Enums;
 using PaymentGateway.Api.Application.DTOs.Requests;
 using PaymentGateway.Api.Application.DTOs.Responses;
 using PaymentGateway.Api.Domain;
@@ -10,6 +12,7 @@ namespace PaymentGateway.Api.Application
     public interface IPaymentService
     {
         Task<PaymentResponse> ProcessPaymentAsync(PostPaymentRequest postPaymentRequest);
+        Task<PaymentResponse?> Get(Guid id);
     }
     public class PaymentService: IPaymentService
     {
@@ -38,6 +41,22 @@ namespace PaymentGateway.Api.Application
             _paymentsRepository.Add(payment);
 
             return await Task.FromResult(CreatePaymentResponse(payment));
+        }
+
+        public async Task<PaymentResponse?> Get(Guid id)
+        {
+            PaymentResponse? paymentResponse = null;
+
+            var payment = _paymentsRepository.Get(id);
+
+            if (payment is null)
+            {
+                return await Task.FromResult(paymentResponse) ;
+            }
+
+            paymentResponse = CreatePaymentResponse(payment);
+
+            return await Task.FromResult(paymentResponse);
         }
 
         private PaymentResponse CreatePaymentResponse(Payment payment)
