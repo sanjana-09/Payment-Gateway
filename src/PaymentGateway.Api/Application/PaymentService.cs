@@ -1,26 +1,87 @@
-﻿using FluentValidation;
-
+﻿using PaymentGateway.Api.Application.DTOs.Enums;
 using PaymentGateway.Api.Application.DTOs.Requests;
 using PaymentGateway.Api.Application.DTOs.Responses;
+using PaymentGateway.Api.Domain;
+using PaymentGateway.Api.Domain.Interfaces;
+using PaymentGateway.Api.Domain.Requests;
 
 namespace PaymentGateway.Api.Application
 {
     public interface IPaymentService
     {
-        Task<PostPaymentResponse> ProcessPaymentAsync(PostPaymentRequest postPaymentRequest);
+        Task<PaymentResponse> ProcessPaymentAsync(PostPaymentRequest postPaymentRequest);
     }
     public class PaymentService: IPaymentService
     {
-        private readonly IValidator<PostPaymentRequest> _validator;
+        private readonly IPaymentsRepository _paymentsRepository;
+        private readonly IBankSimulator _bankSimulator;
 
-        public PaymentService(IValidator<PostPaymentRequest> validator)
+        public PaymentService(IPaymentsRepository paymentsRepository, IBankSimulator bankSimulator)
         {
-            _validator = validator;
+            _paymentsRepository = paymentsRepository;
+            _bankSimulator = bankSimulator;
         }
 
-        public Task<PostPaymentResponse> ProcessPaymentAsync(PostPaymentRequest postPaymentRequest)
+        public async Task<PaymentResponse> ProcessPaymentAsync(PostPaymentRequest postPaymentRequest)
         {
-            throw new NotImplementedException();
+            var bankPostPaymentRequest = CreateBankPostPaymentRequest(postPaymentRequest);
+
+            var bankResponse = await _bankSimulator.ProcessPaymentAsync(bankPostPaymentRequest);
+
+            var payment = CreatePayment(postPaymentRequest);
+
+            if (bankResponse is not null && bankResponse.Authorized)
+                payment.Authorized();
+            else
+                payment.Declined();
+
+            _paymentsRepository.Add(payment);
+
+            return await Task.FromResult(CreatePaymentResponse(payment));
+        }
+
+        private PaymentResponse CreatePaymentResponse(Payment payment)
+        {
+            return new PaymentResponse
+            {
+                Amount = payment.Amount,
+                CardNumberLastFour = payment.CardNumberLastFour,
+                Currency = payment.Currency,
+                ExpiryMonth = payment.ExpiryMonth,
+                ExpiryYear = payment.ExpiryYear,
+                Id = payment.Id,
+                Status = payment.Status switch
+                {
+                    Payment.PaymentStatus.Authorized => PaymentStatus.Authorized,
+                    Payment.PaymentStatus.Declined => PaymentStatus.Declined,
+                    _ => PaymentStatus.Declined
+                }
+            };
+        }
+
+        private Payment CreatePayment(PostPaymentRequest postPaymentRequest)
+        {
+            return new Payment()
+            {
+                Amount = postPaymentRequest.Amount,
+                Currency = postPaymentRequest.Currency,
+                ExpiryMonth = postPaymentRequest.ExpiryMonth,
+                ExpiryYear = postPaymentRequest.ExpiryYear,
+                CardNumberLastFour = int.Parse(postPaymentRequest.CardNumber.Substring(postPaymentRequest.CardNumber.Length - 4)),
+                Status = Payment.PaymentStatus.Pending
+            };
+        }
+
+        private BankPostPaymentRequest CreateBankPostPaymentRequest(PostPaymentRequest postPaymentRequest)
+        {
+            return new BankPostPaymentRequest()
+            {
+                Amount = postPaymentRequest.Amount,
+                Card_Number = postPaymentRequest.CardNumber,
+                Currency = postPaymentRequest.Currency,
+                Cvv = postPaymentRequest.Cvv,
+                Expiry_Date = $"{postPaymentRequest.ExpiryMonth}/{postPaymentRequest.ExpiryYear}"
+            };
         }
     }
 }

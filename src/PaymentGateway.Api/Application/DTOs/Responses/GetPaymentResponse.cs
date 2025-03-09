@@ -1,4 +1,4 @@
-﻿using PaymentGateway.Api.Enums;
+﻿using PaymentGateway.Api.Application.DTOs.Enums;
 
 namespace PaymentGateway.Api.Application.DTOs.Responses;
 

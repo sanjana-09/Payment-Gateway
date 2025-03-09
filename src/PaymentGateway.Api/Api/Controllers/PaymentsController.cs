@@ -1,11 +1,15 @@
 ﻿using System.Net;
 
+using FluentValidation;
+using FluentValidation.Results;
+
 using Microsoft.AspNetCore.Mvc;
 
 using PaymentGateway.Api.Application;
+using PaymentGateway.Api.Application.DTOs.Enums;
 using PaymentGateway.Api.Application.DTOs.Requests;
 using PaymentGateway.Api.Application.DTOs.Responses;
-using PaymentGateway.Api.Application.Validators;
+using PaymentGateway.Api.Domain.Interfaces;
 using PaymentGateway.Api.Infrastructure;
 
 namespace PaymentGateway.Api.Api.Controllers;
@@ -14,17 +18,23 @@ namespace PaymentGateway.Api.Api.Controllers;
 [ApiController]
 public class PaymentsController : Controller
 {
-    private readonly PaymentsRepository _paymentsRepository;
+    private readonly IPaymentService _paymentService;
+    private readonly IValidator<PostPaymentRequest> _validator;
+    private readonly IPaymentsRepository _paymentsRepository;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public PaymentsController(PaymentsRepository paymentsRepository, 
+    public PaymentsController(IPaymentService paymentService,
+        IValidator<PostPaymentRequest> validator,
+        IPaymentsRepository paymentsRepository, 
         IHttpClientFactory httpClientFactory)
     {
+        _paymentService = paymentService;
+        _validator = validator;
         _paymentsRepository = paymentsRepository;
         _httpClientFactory = httpClientFactory; }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<PostPaymentRequest?>> GetPaymentAsync(Guid id)
+    public async Task<ActionResult<PaymentResponse?>> GetPaymentAsync(Guid id)
     {
         var payment = _paymentsRepository.Get(id);
 
@@ -32,21 +42,25 @@ public class PaymentsController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult<PostPaymentResponse>> CreatePaymentAsync([FromBody] PostPaymentRequest request)
+    public async Task<ActionResult<PaymentResponse>> CreatePaymentAsync([FromBody] PostPaymentRequest request)
     {
-        //validate request
-        //call service
-        //return response
-        var httpClient = _httpClientFactory.CreateClient();
-        var response = await httpClient.PostAsJsonAsync("http://localhost:8080/payments", request);
-
-        if (response.StatusCode != HttpStatusCode.OK)
+        var validationResult = await _validator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            return new BadRequestResult();
+            return RejectedPaymentResponse(validationResult);
         }
 
-        //_paymentsRepository.Add(payment);
+        var response = await _paymentService.ProcessPaymentAsync(request);
 
-        return new OkObjectResult(new PostPaymentResponse());
+        return new OkObjectResult(response);
+    }
+
+    private ActionResult<PaymentResponse> RejectedPaymentResponse(ValidationResult validationResult)
+    {
+        return new BadRequestObjectResult(new
+        { 
+            Response = new PaymentResponse(){Status = PaymentStatus.Rejected}, 
+            Errors = validationResult.Errors.Select(e => e.ErrorMessage) 
+        });
     }
 }

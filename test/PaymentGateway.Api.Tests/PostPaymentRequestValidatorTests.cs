@@ -2,8 +2,8 @@
 using FluentAssertions;
 using FluentValidation.TestHelper;
 
+using PaymentGateway.Api.Api.Validators;
 using PaymentGateway.Api.Application.DTOs.Requests;
-using PaymentGateway.Api.Application.Validators;
 
 namespace PaymentGateway.Api.Tests;
 
@@ -67,10 +67,12 @@ public class PostPaymentRequestValidatorTests
     #endregion
 
     #region Expiry Date
-    [Test]
-    public void Should_Have_Error_When_ExpiryMonth_Is_Invalid()
+
+    [TestCase(0)]
+    [TestCase(13)]
+    public void Should_Have_Error_When_ExpiryMonth_Is_Invalid(int invalidExpiryMonth)
     {
-        var model = new PostPaymentRequest { ExpiryMonth = 13 };
+        var model = new PostPaymentRequest { ExpiryMonth = invalidExpiryMonth };
 
         var result = _validator.TestValidate(model);
 

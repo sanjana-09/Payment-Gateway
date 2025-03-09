@@ -2,7 +2,7 @@
 
 using PaymentGateway.Api.Application.DTOs.Requests;
 
-namespace PaymentGateway.Api.Application.Validators;
+namespace PaymentGateway.Api.Api.Validators;
 
 public class PostPaymentRequestValidator : AbstractValidator<PostPaymentRequest>
 {
