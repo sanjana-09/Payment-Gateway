@@ -1,29 +1,30 @@
 ﻿using NUnit.Framework;
-using FluentAssertions;
 using FluentValidation.TestHelper;
 
 using PaymentGateway.Api.Api.Validators;
-using PaymentGateway.Api.Application.DTOs.Requests;
+using PaymentGateway.Api.Application.Commands;
 
 namespace PaymentGateway.Api.Tests;
 
 [TestFixture]
-public class PostPaymentRequestValidatorTests
+public class CreatePaymentRequestValidatorTests
 {
-    private PostPaymentRequestValidator _validator;
+    private CreatePaymentRequestValidator _validator;
 
     [SetUp]
     public void Setup()
     {
-        _validator = new PostPaymentRequestValidator();
+        _validator = new CreatePaymentRequestValidator();
     }
 
     #region Card Number
 
-    [Test]
-    public void Should_Have_Error_When_CardNumber_Is_Empty()
+    [TestCase("")]
+    [TestCase("   ")]
+    [TestCase(null)]
+    public void Should_Have_Error_When_CardNumber_Is_Empty(string invalidCardNumber)
     {
-        var model = new PostPaymentRequest { CardNumber = "" };
+        var model = new CreatePaymentRequest { CardNumber = invalidCardNumber };
 
         var result = _validator.TestValidate(model);
 
@@ -35,7 +36,7 @@ public class PostPaymentRequestValidatorTests
     [TestCase("123456")]
     public void Should_Have_Error_When_CardNumber_Length_Is_Invalid(string cardNumber)
     {
-        var model = new PostPaymentRequest { CardNumber = cardNumber };
+        var model = new CreatePaymentRequest { CardNumber = cardNumber };
 
         var result = _validator.TestValidate(model);
 
@@ -46,7 +47,7 @@ public class PostPaymentRequestValidatorTests
     [Test]
     public void Should_Have_Error_When_CardNumber_Contains_NonNumeric_Characters()
     {
-        var model = new PostPaymentRequest { CardNumber = "1234A567890" };
+        var model = new CreatePaymentRequest { CardNumber = "1234A567890" };
 
         var result = _validator.TestValidate(model);
 
@@ -57,7 +58,7 @@ public class PostPaymentRequestValidatorTests
     [Test]
     public void Should_Not_Have_Error_When_CardNumber_Is_Valid()
     {
-        var model = new PostPaymentRequest { CardNumber = "1234567890123456" };
+        var model = new CreatePaymentRequest { CardNumber = "1234567890123456" };
 
         var result = _validator.TestValidate(model);
 
@@ -72,7 +73,7 @@ public class PostPaymentRequestValidatorTests
     [TestCase(13)]
     public void Should_Have_Error_When_ExpiryMonth_Is_Invalid(int invalidExpiryMonth)
     {
-        var model = new PostPaymentRequest { ExpiryMonth = invalidExpiryMonth };
+        var model = new CreatePaymentRequest { ExpiryMonth = invalidExpiryMonth };
 
         var result = _validator.TestValidate(model);
 
@@ -83,7 +84,7 @@ public class PostPaymentRequestValidatorTests
     [Test]
     public void Should_Have_Error_When_ExpiryYear_Is_In_Past()
     {
-        var model = new PostPaymentRequest { ExpiryMonth = 12, ExpiryYear = DateTime.Now.Year - 1 };
+        var model = new CreatePaymentRequest { ExpiryMonth = 12, ExpiryYear = DateTime.Now.Year - 1 };
 
         var result = _validator.TestValidate(model);
 
@@ -94,7 +95,7 @@ public class PostPaymentRequestValidatorTests
     [Test]
     public void Should_Have_Error_When_ExpiryMonth_Is_In_The_Past_And_ExpiryYear_Is_Current()
     {
-        var model = new PostPaymentRequest { ExpiryMonth = DateTime.Now.Month - 1, ExpiryYear = DateTime.Now.Year };
+        var model = new CreatePaymentRequest { ExpiryMonth = DateTime.Now.Month - 1, ExpiryYear = DateTime.Now.Year };
 
         var result = _validator.TestValidate(model);
 
@@ -105,15 +106,13 @@ public class PostPaymentRequestValidatorTests
     [Test]
     public void Should_Pass_When_ExpiryMonth_Is_Current_Or_Future_And_ExpiryYear_Is_Current()
     {
-        var model = new PostPaymentRequest { ExpiryMonth = DateTime.Now.Month, ExpiryYear = DateTime.Now.Year };
+        var model = new CreatePaymentRequest { ExpiryMonth = DateTime.Now.Month, ExpiryYear = DateTime.Now.Year };
 
         var result = _validator.TestValidate(model);
 
         result.ShouldNotHaveValidationErrorFor(x => x.ExpiryMonth);
         result.ShouldNotHaveValidationErrorFor(x => x.ExpiryYear);
     }
-
-
 
     #endregion
 
@@ -122,7 +121,7 @@ public class PostPaymentRequestValidatorTests
     [TestCase("")]
     public void Should_Have_Error_When_Currency_Is_Invalid(string invalidCurrency)
     {
-        var model = new PostPaymentRequest { Currency = invalidCurrency };
+        var model = new CreatePaymentRequest { Currency = invalidCurrency };
 
         var result = _validator.TestValidate(model);
 
@@ -135,7 +134,7 @@ public class PostPaymentRequestValidatorTests
     [TestCase("EUR")]
     public void Should_Pass_When_Currency_Is_Valid(string currency)
     {
-        var model = new PostPaymentRequest { Currency = currency };
+        var model = new CreatePaymentRequest { Currency = currency };
 
         var result = _validator.TestValidate(model);
 
@@ -151,7 +150,7 @@ public class PostPaymentRequestValidatorTests
     [TestCase(0)]
     public void Should_Have_Error_When_Amount_Is_Invalid(int invalidAmount)
     {
-        var model = new PostPaymentRequest { Amount = invalidAmount };
+        var model = new CreatePaymentRequest { Amount = invalidAmount };
 
         var result = _validator.TestValidate(model);
 
@@ -168,7 +167,7 @@ public class PostPaymentRequestValidatorTests
     [TestCase("")]
     public void Should_Have_Error_When_CVV_Is_Invalid(string invalidCvv)
     {
-        var model = new PostPaymentRequest { Cvv = invalidCvv };
+        var model = new CreatePaymentRequest { Cvv = invalidCvv };
 
         var result = _validator.TestValidate(model);
 
@@ -180,7 +179,7 @@ public class PostPaymentRequestValidatorTests
     [TestCase("1234")]
     public void Should_Pass_When_CVV_Is_Valid(string Cvv)
     {
-        var model = new PostPaymentRequest { Cvv = Cvv };
+        var model = new CreatePaymentRequest { Cvv = Cvv };
 
         var result = _validator.TestValidate(model);
 

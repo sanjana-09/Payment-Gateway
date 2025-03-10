@@ -1,4 +1,8 @@
+using System.Reflection;
+
 using FluentValidation;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using PaymentGateway.Api.Api.Validators;
 using PaymentGateway.Api.Application;
@@ -12,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
 
 builder.Services.AddControllers();
-builder.Services.AddValidatorsFromAssemblyContaining<PostPaymentRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePaymentRequestValidator>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -21,6 +25,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPaymentsRepository, PaymentsRepository>();
 builder.Services.AddScoped<IBankSimulator, BankSimulator>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+// Register MediatR
+builder.Services.ConfigureApplication();
 
 var app = builder.Build();
 

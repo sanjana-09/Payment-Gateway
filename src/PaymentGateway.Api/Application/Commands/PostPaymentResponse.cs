@@ -1,12 +1,12 @@
-﻿using PaymentGateway.Api.Application.DTOs.Enums;
+﻿using PaymentGateway.Api.Application.Common;
 
-namespace PaymentGateway.Api.Application.DTOs.Responses;
+namespace PaymentGateway.Api.Application.Commands;
 
-public class PaymentResponse
+public class PostPaymentResponse
 {
     public Guid Id { get; set; }
     public PaymentStatus Status { get; set; }
-    public int CardNumberLastFour { get; set; }
+    public string CardNumberLastFour { get; set; }
     public int ExpiryMonth { get; set; }
     public int ExpiryYear { get; set; }
     public string Currency { get; set; }

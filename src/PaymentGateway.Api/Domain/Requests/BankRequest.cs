@@ -1,6 +1,6 @@
 ﻿namespace PaymentGateway.Api.Domain.Requests;
 
-public class BankPostPaymentRequest
+public class BankRequest
 {
     public string Card_Number { get; set; }
     public string Expiry_Date { get; set; }

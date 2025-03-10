@@ -1,10 +1,11 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+
 using Microsoft.AspNetCore.Mvc;
+
 using PaymentGateway.Api.Application;
-using PaymentGateway.Api.Application.DTOs.Enums;
-using PaymentGateway.Api.Application.DTOs.Requests;
-using PaymentGateway.Api.Application.DTOs.Responses;
+using PaymentGateway.Api.Application.Commands;
+using PaymentGateway.Api.Application.Common;
 using PaymentGateway.Api.Domain.Interfaces;
 
 namespace PaymentGateway.Api.Api.Controllers;
@@ -14,11 +15,11 @@ namespace PaymentGateway.Api.Api.Controllers;
 public class PaymentsController : Controller
 {
     private readonly IPaymentService _paymentService;
-    private readonly IValidator<PostPaymentRequest> _validator;
+    private readonly IValidator<CreatePaymentRequest> _validator;
     private readonly IPaymentsRepository _paymentsRepository;
 
     public PaymentsController(IPaymentService paymentService,
-        IValidator<PostPaymentRequest> validator,
+        IValidator<CreatePaymentRequest> validator,
         IPaymentsRepository paymentsRepository)
     {
         _paymentService = paymentService;
@@ -27,7 +28,7 @@ public class PaymentsController : Controller
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<PaymentResponse?>> GetPaymentAsync(Guid id)
+    public async Task<ActionResult<PostPaymentResponse?>> GetPaymentAsync(Guid id)
     {
         var paymentResponse = await _paymentService.Get(id);
         var payment = _paymentsRepository.Get(id);
@@ -38,7 +39,7 @@ public class PaymentsController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult<PaymentResponse>> CreatePaymentAsync([FromBody] PostPaymentRequest request)
+    public async Task<ActionResult<PostPaymentResponse>> CreatePaymentAsync([FromBody] CreatePaymentRequest request)
     {
         var validationResult = await _validator.ValidateAsync(request);
         if (!validationResult.IsValid)
@@ -51,11 +52,11 @@ public class PaymentsController : Controller
         return new OkObjectResult(response);
     }
 
-    private ActionResult<PaymentResponse> RejectedPaymentResponse(ValidationResult validationResult)
+    private ActionResult<PostPaymentResponse> RejectedPaymentResponse(ValidationResult validationResult)
     {
         return new BadRequestObjectResult(new
         { 
-            Response = new PaymentResponse(){Status = PaymentStatus.Rejected}, 
+            Response = new PostPaymentResponse(){Status = PaymentStatus.Rejected}, 
             Errors = validationResult.Errors.Select(e => e.ErrorMessage) 
         });
     }

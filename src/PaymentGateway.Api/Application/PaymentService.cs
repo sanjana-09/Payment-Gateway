@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-using PaymentGateway.Api.Application.DTOs.Enums;
-using PaymentGateway.Api.Application.DTOs.Requests;
-using PaymentGateway.Api.Application.DTOs.Responses;
+﻿using PaymentGateway.Api.Application.Commands;
+using PaymentGateway.Api.Application.Common;
+using PaymentGateway.Api.Application.Queries;
 using PaymentGateway.Api.Domain;
 using PaymentGateway.Api.Domain.Interfaces;
 using PaymentGateway.Api.Domain.Requests;
@@ -11,8 +9,8 @@ namespace PaymentGateway.Api.Application
 {
     public interface IPaymentService
     {
-        Task<PaymentResponse> ProcessPaymentAsync(PostPaymentRequest postPaymentRequest);
-        Task<PaymentResponse?> Get(Guid id);
+        Task<PostPaymentResponse> ProcessPaymentAsync(CreatePaymentRequest createPaymentRequest);
+        Task<GetPaymentResponse?> Get(Guid id);
     }
     public class PaymentService: IPaymentService
     {
@@ -25,13 +23,13 @@ namespace PaymentGateway.Api.Application
             _bankSimulator = bankSimulator;
         }
 
-        public async Task<PaymentResponse> ProcessPaymentAsync(PostPaymentRequest postPaymentRequest)
+        public async Task<PostPaymentResponse> ProcessPaymentAsync(CreatePaymentRequest createPaymentRequest)
         {
-            var bankPostPaymentRequest = CreateBankPostPaymentRequest(postPaymentRequest);
+            var bankPostPaymentRequest = CreateBankPostPaymentRequest(createPaymentRequest);
 
             var bankResponse = await _bankSimulator.ProcessPaymentAsync(bankPostPaymentRequest);
 
-            var payment = CreatePayment(postPaymentRequest);
+            var payment = CreatePayment(createPaymentRequest);
 
             if (bankResponse is not null && bankResponse.Authorized)
                 payment.Authorized();
@@ -40,12 +38,12 @@ namespace PaymentGateway.Api.Application
 
             _paymentsRepository.Add(payment);
 
-            return await Task.FromResult(CreatePaymentResponse(payment));
+            return await Task.FromResult(CreatePostPaymentResponse(payment));
         }
 
-        public async Task<PaymentResponse?> Get(Guid id)
+        public async Task<GetPaymentResponse?> Get(Guid id)
         {
-            PaymentResponse? paymentResponse = null;
+            GetPaymentResponse? paymentResponse = null;
 
             var payment = _paymentsRepository.Get(id);
 
@@ -54,14 +52,15 @@ namespace PaymentGateway.Api.Application
                 return await Task.FromResult(paymentResponse) ;
             }
 
-            paymentResponse = CreatePaymentResponse(payment);
+            paymentResponse = CreateGetPaymentResponse(payment);
 
             return await Task.FromResult(paymentResponse);
         }
 
-        private PaymentResponse CreatePaymentResponse(Payment payment)
+        private PostPaymentResponse CreatePostPaymentResponse(Payment payment)
         {
-            return new PaymentResponse
+            return new 
+            PostPaymentResponse
             {
                 Amount = payment.Amount,
                 CardNumberLastFour = payment.CardNumberLastFour,
@@ -78,28 +77,53 @@ namespace PaymentGateway.Api.Application
             };
         }
 
-        private Payment CreatePayment(PostPaymentRequest postPaymentRequest)
+        private GetPaymentResponse CreateGetPaymentResponse(Payment payment)
+        {
+            return new GetPaymentResponse()
+            {
+                Amount = payment.Amount,
+                CardNumberLastFour = payment.CardNumberLastFour,
+                Currency = payment.Currency,
+                ExpiryMonth = payment.ExpiryMonth,
+                ExpiryYear = payment.ExpiryYear,
+                Id = payment.Id,
+                Status = payment.Status switch
+                {
+                    Payment.PaymentStatus.Authorized => PaymentStatus.Authorized,
+                    Payment.PaymentStatus.Declined => PaymentStatus.Declined,
+                    _ => PaymentStatus.Declined
+                }
+            };
+        }
+
+        private Payment CreatePayment(CreatePaymentRequest createPaymentRequest)
         {
             return new Payment()
             {
-                Amount = postPaymentRequest.Amount,
-                Currency = postPaymentRequest.Currency,
-                ExpiryMonth = postPaymentRequest.ExpiryMonth,
-                ExpiryYear = postPaymentRequest.ExpiryYear,
-                CardNumberLastFour = int.Parse(postPaymentRequest.CardNumber.Substring(postPaymentRequest.CardNumber.Length - 4)),
+                Amount = createPaymentRequest.Amount,
+                Currency = createPaymentRequest.Currency,
+                ExpiryMonth = createPaymentRequest.ExpiryMonth,
+                ExpiryYear = createPaymentRequest.ExpiryYear,
+                CardNumberLastFour = MaskCardNumber(createPaymentRequest),
                 Status = Payment.PaymentStatus.Pending
             };
         }
 
-        private BankPostPaymentRequest CreateBankPostPaymentRequest(PostPaymentRequest postPaymentRequest)
+        private static string MaskCardNumber(CreatePaymentRequest createPaymentRequest)
         {
-            return new BankPostPaymentRequest()
+            var lastFour = int.Parse(createPaymentRequest.CardNumber.Substring(createPaymentRequest.CardNumber.Length - 4));
+            return $"**** **** **** {lastFour}";
+        }
+
+        private BankRequest CreateBankPostPaymentRequest(CreatePaymentRequest createPaymentRequest)
+        {
+            return new BankRequest()
             {
-                Amount = postPaymentRequest.Amount,
-                Card_Number = postPaymentRequest.CardNumber,
-                Currency = postPaymentRequest.Currency,
-                Cvv = postPaymentRequest.Cvv,
-                Expiry_Date = $"{postPaymentRequest.ExpiryMonth}/{postPaymentRequest.ExpiryYear}"
+                Amount = createPaymentRequest.Amount,
+                Card_Number = createPaymentRequest.CardNumber,
+                Currency = createPaymentRequest.Currency,
+                Cvv = createPaymentRequest.Cvv,
+                Expiry_Date = $"{createPaymentRequest.ExpiryMonth}/{createPaymentRequest.ExpiryYear}"
             };
         }
     }

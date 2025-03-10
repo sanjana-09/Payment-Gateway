@@ -1,6 +1,8 @@
-﻿namespace PaymentGateway.Api.Application.DTOs.Requests;
+﻿using MediatR;
 
-public class PostPaymentRequest
+namespace PaymentGateway.Api.Application.Commands;
+
+public class CreatePaymentRequest : IRequest<PostPaymentResponse>
 {
     public string CardNumber { get; set; }
     public int ExpiryMonth { get; set; }

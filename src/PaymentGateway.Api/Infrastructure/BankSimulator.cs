@@ -14,12 +14,12 @@ namespace PaymentGateway.Api.Infrastructure
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<BankResponse?> ProcessPaymentAsync(BankPostPaymentRequest bankPostPaymentRequest)
+        public async Task<BankResponse?> ProcessPaymentAsync(BankRequest bankRequest)
         {
             var httpClient = _httpClientFactory.CreateClient();
             string? bankUrl = "http://localhost:8080/payments";
 
-            var response = await httpClient.PostAsJsonAsync(bankUrl, bankPostPaymentRequest);
+            var response = await httpClient.PostAsJsonAsync(bankUrl, bankRequest);
 
             if (response.StatusCode == HttpStatusCode.OK)
             {

@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
 
-using PaymentGateway.Api.Application.DTOs.Requests;
+using PaymentGateway.Api.Application.Commands;
 
 namespace PaymentGateway.Api.Api.Validators;
 
-public class PostPaymentRequestValidator : AbstractValidator<PostPaymentRequest>
+public class CreatePaymentRequestValidator : AbstractValidator<CreatePaymentRequest>
 {
-       public PostPaymentRequestValidator() 
+       public CreatePaymentRequestValidator() 
        { 
             RuleFor(x => x.CardNumber)
                 .NotEmpty().WithMessage("Card number is required")

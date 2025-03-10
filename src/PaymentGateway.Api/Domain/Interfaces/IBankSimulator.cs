@@ -5,5 +5,5 @@ namespace PaymentGateway.Api.Domain.Interfaces;
 
 public interface IBankSimulator
 {
-    Task<BankResponse?> ProcessPaymentAsync(BankPostPaymentRequest bankPostPaymentRequest);
+    Task<BankResponse?> ProcessPaymentAsync(BankRequest bankRequest);
 }
