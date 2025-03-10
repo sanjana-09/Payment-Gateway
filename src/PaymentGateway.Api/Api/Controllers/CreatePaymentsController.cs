@@ -38,7 +38,7 @@ public class CreatePaymentsController : Controller
     {
         return new BadRequestObjectResult(new
         { 
-            Response = new PostPaymentResponse(){Status = PaymentStatus.Rejected}, 
+            Response = new PostPaymentResponse(){StatusCode = PaymentStatus.Rejected}, 
             Errors = validationResult.Errors.Select(e => e.ErrorMessage) 
         });
     }

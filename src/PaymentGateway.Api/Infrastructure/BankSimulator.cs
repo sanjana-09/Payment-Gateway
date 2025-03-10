@@ -19,6 +19,7 @@ namespace PaymentGateway.Api.Infrastructure
             var httpClient = _httpClientFactory.CreateClient();
             string? bankUrl = "http://localhost:8080/payments";
 
+            //try-catch here and log
             var response = await httpClient.PostAsJsonAsync(bankUrl, bankRequest);
 
             if (response.StatusCode == HttpStatusCode.OK)

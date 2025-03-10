@@ -20,7 +20,7 @@ namespace PaymentGateway.Api.Application.Commands
         public async Task<PostPaymentResponse> Handle(CreatePaymentRequest createPaymentRequest, CancellationToken cancellationToken)
         {
 
-            var bankPostPaymentRequest = CreateBankPostPaymentRequest(createPaymentRequest);
+            var bankPostPaymentRequest = CreateBankPaymentRequest(createPaymentRequest);
 
             var bankResponse = await _bankSimulator.ProcessPaymentAsync(bankPostPaymentRequest);
 
@@ -33,10 +33,10 @@ namespace PaymentGateway.Api.Application.Commands
 
             _paymentsRepository.Add(payment);
 
-            return await Task.FromResult(CreatePostPaymentResponse(payment));
+            return CreatePostPaymentResponse(payment);
         }
 
-        private BankRequest CreateBankPostPaymentRequest(CreatePaymentRequest createPaymentRequest)
+        private BankRequest CreateBankPaymentRequest(CreatePaymentRequest createPaymentRequest)
         {
             return new BankRequest()
             {
@@ -52,6 +52,7 @@ namespace PaymentGateway.Api.Application.Commands
         {
             return new Payment()
             {
+                Id = Guid.NewGuid(),
                 Amount = createPaymentRequest.Amount,
                 Currency = createPaymentRequest.Currency,
                 ExpiryMonth = createPaymentRequest.ExpiryMonth,
@@ -72,7 +73,7 @@ namespace PaymentGateway.Api.Application.Commands
                     ExpiryMonth = payment.ExpiryMonth,
                     ExpiryYear = payment.ExpiryYear,
                     Id = payment.Id,
-                    Status = payment.Status switch
+                    StatusCode = payment.Status switch
                     {
                         Payment.PaymentStatus.Authorized => PaymentStatus.Authorized,
                         Payment.PaymentStatus.Declined => PaymentStatus.Declined,

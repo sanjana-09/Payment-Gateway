@@ -1,16 +1,10 @@
 ﻿using FakeItEasy;
-
 using FluentValidation;
 using FluentValidation.Results;
-
 using MediatR;
-
 using Microsoft.AspNetCore.Mvc;
-
 using NUnit.Framework;
-
 using PaymentGateway.Api.Api.Controllers;
-using PaymentGateway.Api.Application;
 using PaymentGateway.Api.Application.Commands;
 
 namespace PaymentGateway.Api.Tests.UnitTests.Api

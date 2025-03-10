@@ -54,7 +54,7 @@ public class CreatePaymentRequestHandlerTests
     }
 
     [Test]
-    public async Task Return_declined_response_when_bank_does_not_authorizes_payment()
+    public async Task Return_declined_response_when_bank_does_not_authorize_payment()
     {
         // Arrange
 
@@ -118,7 +118,7 @@ public class CreatePaymentRequestHandlerTests
         Assert.Multiple(() =>
         {
             Assert.That(response, Is.Not.Null);
-            Assert.That(response.Status, Is.EqualTo(paymentStatus));
+            Assert.That(response.StatusCode, Is.EqualTo(paymentStatus));
             Assert.That(response.Amount, Is.EqualTo(request.Amount));
             Assert.That(response.Currency, Is.EqualTo(request.Currency));
             Assert.That(response.CardNumberLastFour, Is.EqualTo("**** **** **** 4567"));

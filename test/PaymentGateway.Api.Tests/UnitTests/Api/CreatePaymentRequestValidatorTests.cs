@@ -176,6 +176,18 @@ public class CreatePaymentRequestValidatorTests
             .WithErrorMessage("CVV must be 3 to 4 characters long");
     }
 
+    [TestCase("abc")]
+    [TestCase("12c-")]
+    public void Should_Have_Error_When_CVV_Is_Invalid_With_Non_Numeric_Chars(string invalidCvv)
+    {
+        var model = new CreatePaymentRequest { Cvv = invalidCvv };
+
+        var result = _validator.TestValidate(model);
+
+        result.ShouldHaveValidationErrorFor(x => x.Cvv)
+            .WithErrorMessage("CVV must only contain numeric characters");
+    }
+
     [TestCase("123")]
     [TestCase("1234")]
     public void Should_Pass_When_CVV_Is_Valid(string Cvv)
