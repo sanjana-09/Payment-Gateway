@@ -28,6 +28,8 @@ namespace PaymentGateway.Api.Application.Commands
 
             if (bankResponse is not null && bankResponse.Authorized)
                 payment.Authorized();
+            else
+                payment.Declined();
 
             _paymentsRepository.Add(payment);
 
