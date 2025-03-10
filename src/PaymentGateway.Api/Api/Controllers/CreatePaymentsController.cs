@@ -1,41 +1,23 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-
-using PaymentGateway.Api.Application;
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Common;
-using PaymentGateway.Api.Domain.Interfaces;
 
 namespace PaymentGateway.Api.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PaymentsController : Controller
+public class CreatePaymentsController : Controller
 {
-    private readonly IPaymentService _paymentService;
     private readonly IValidator<CreatePaymentRequest> _validator;
-    private readonly IPaymentsRepository _paymentsRepository;
+    private readonly IMediator _mediator;
 
-    public PaymentsController(IPaymentService paymentService,
-        IValidator<CreatePaymentRequest> validator,
-        IPaymentsRepository paymentsRepository)
+    public CreatePaymentsController(IValidator<CreatePaymentRequest> validator, IMediator mediator)
     {
-        _paymentService = paymentService;
         _validator = validator;
-        _paymentsRepository = paymentsRepository;
-    }
-
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<PostPaymentResponse?>> GetPaymentAsync(Guid id)
-    {
-        var paymentResponse = await _paymentService.Get(id);
-        var payment = _paymentsRepository.Get(id);
-
-        if (payment is null) return new NotFoundResult();
-
-        return new OkObjectResult(paymentResponse);
+        _mediator = mediator;
     }
 
     [HttpPost]
@@ -47,7 +29,7 @@ public class PaymentsController : Controller
             return RejectedPaymentResponse(validationResult);
         }
 
-        var response = await _paymentService.ProcessPaymentAsync(request);
+        var response = await _mediator.Send(request);
 
         return new OkObjectResult(response);
     }

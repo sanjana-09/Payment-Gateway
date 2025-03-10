@@ -1,9 +1,4 @@
-using System.Reflection;
-
 using FluentValidation;
-
-using Microsoft.Extensions.DependencyInjection;
-
 using PaymentGateway.Api.Api.Validators;
 using PaymentGateway.Api.Application;
 using PaymentGateway.Api.Domain.Interfaces;

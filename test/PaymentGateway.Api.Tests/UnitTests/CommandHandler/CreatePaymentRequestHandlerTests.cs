@@ -8,7 +8,7 @@ using PaymentGateway.Api.Domain.Interfaces;
 using PaymentGateway.Api.Domain.Requests;
 using PaymentGateway.Api.Domain.Responses;
 
-namespace PaymentGateway.Api.Tests.CommandHandler;
+namespace PaymentGateway.Api.Tests.UnitTests.CommandHandler;
 
 [TestFixture]
 public class CreatePaymentRequestHandlerTests

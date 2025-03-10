@@ -1,10 +1,11 @@
-﻿using NUnit.Framework;
-using FluentValidation.TestHelper;
+﻿using FluentValidation.TestHelper;
+
+using NUnit.Framework;
 
 using PaymentGateway.Api.Api.Validators;
 using PaymentGateway.Api.Application.Commands;
 
-namespace PaymentGateway.Api.Tests;
+namespace PaymentGateway.Api.Tests.UnitTests.Api;
 
 [TestFixture]
 public class CreatePaymentRequestValidatorTests

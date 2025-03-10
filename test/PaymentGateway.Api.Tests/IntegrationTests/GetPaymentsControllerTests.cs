@@ -7,25 +7,25 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 
 using PaymentGateway.Api.Api.Controllers;
-using PaymentGateway.Api.Application.Commands;
+using PaymentGateway.Api.Application.Queries;
 using PaymentGateway.Api.Domain;
 using PaymentGateway.Api.Domain.Interfaces;
 using PaymentGateway.Api.Infrastructure;
 
-namespace PaymentGateway.Api.Tests;
+namespace PaymentGateway.Api.Tests.IntegrationTests;
 
 [TestFixture]
-public class PaymentsControllerTests
+public class GetPaymentsControllerTests
 {
     private readonly Random _random = new();
     private IPaymentsRepository _paymentsRepository;
-    private WebApplicationFactory<PaymentsController> _factory;
+    private WebApplicationFactory<GetPaymentsController> _factory;
     private HttpClient _client;
 
     [SetUp]
     public void Setup()
     {
-        _factory = new WebApplicationFactory<PaymentsController>()
+        _factory = new WebApplicationFactory<GetPaymentsController>()
             .WithWebHostBuilder(builder =>
             builder.ConfigureServices(services =>
             {
@@ -53,9 +53,9 @@ public class PaymentsControllerTests
         _paymentsRepository.Add(payment);
 
         // Act
-        var response = await _client.GetAsync($"/api/Payments/{payment.Id}");
-        var paymentResponse = await response.Content.ReadFromJsonAsync<PostPaymentResponse>();
-        
+        var response = await _client.GetAsync($"/api/GetPayments/{payment.Id}");
+        var paymentResponse = await response.Content.ReadFromJsonAsync<GetPaymentResponse>();
+
         // Assert
         Assert.That(HttpStatusCode.OK, Is.EqualTo(response.StatusCode));
         Assert.That(paymentResponse, Is.Not.Null);
@@ -65,8 +65,8 @@ public class PaymentsControllerTests
     public async Task Returns404IfPaymentNotFound()
     {
         // Act
-        var response = await _client.GetAsync($"/api/Payments/{Guid.NewGuid()}");
-        
+        var response = await _client.GetAsync($"/api/GetPayments/{Guid.NewGuid()}");
+
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
     }
