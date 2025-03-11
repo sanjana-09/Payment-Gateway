@@ -1,4 +1,6 @@
-﻿namespace PaymentGateway.Api.Domain.Interfaces;
+﻿using PaymentGateway.Api.Domain.Entities;
+
+namespace PaymentGateway.Api.Domain.Interfaces;
 
 public interface IPaymentsRepository
 {

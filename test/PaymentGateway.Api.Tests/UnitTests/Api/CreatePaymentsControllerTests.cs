@@ -6,13 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using NUnit.Framework;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Commands;
+using PaymentGateway.Api.Application.Commands.Responses;
+using PaymentGateway.Api.Application.Common;
 
 namespace PaymentGateway.Api.Tests.UnitTests.Api
 {
     [TestFixture]
     public class CreatePaymentsControllerTests
     { 
-        private IValidator<CreatePaymentRequest> _validator;
+        private IValidator<CreatePaymentCommand> _validator;
         private IMediator _mediator;
 
         private CreatePaymentsController _controller;
@@ -20,7 +22,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
         [SetUp]
         public void Setup()
         {
-            _validator = A.Fake<IValidator<CreatePaymentRequest>>();
+            _validator = A.Fake<IValidator<CreatePaymentCommand>>();
             _mediator = A.Fake<IMediator>();
 
             _controller = new CreatePaymentsController(_validator, _mediator);
@@ -32,34 +34,55 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             // Arrange
             var validationResult = new ValidationResult(new[] { new ValidationFailure("Field", "Error") });
 
-            A.CallTo(() => _validator.ValidateAsync(A<CreatePaymentRequest>._, A<CancellationToken>._)).Returns(Task.FromResult(validationResult));
+            A.CallTo(() => _validator.ValidateAsync(A<CreatePaymentCommand>._, A<CancellationToken>._)).Returns(Task.FromResult(validationResult));
 
+            var createPaymentCommand = new CreatePaymentCommand(
+                CardNumber: "1234567812345678",
+                ExpiryMonth: 12,
+                ExpiryYear: 2025,
+                Currency: "USD",
+                Amount: 1000,
+                Cvv: "123"
+            );
             // Act
-            var result = await _controller.CreatePaymentAsync(new CreatePaymentRequest());
+            var result = await _controller.CreatePaymentAsync(createPaymentCommand);
 
             // Assert
-            Assert.That(result.Result, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+            var badRequestResult = result as BadRequestObjectResult;
+
+            Assert.That(badRequestResult.Value, Is.InstanceOf<RejectedPaymentResponse>());
+
         }
 
         [Test]
         public async Task Returns_200_OK_when_payment_request_is_processed_successfully()
         {
             // Arrange
-            var request = new CreatePaymentRequest();
+            var createPaymentCommand = new CreatePaymentCommand(
+                CardNumber: "1234567812345678",
+                ExpiryMonth: 12,
+                ExpiryYear: 2025,
+                Currency: "USD",
+                Amount: 1000,
+                Cvv: "123"
+            );
 
             var validationResult = A.Fake<ValidationResult>();
             A.CallTo(() => validationResult.IsValid).Returns(true);
-            A.CallTo(() => _validator.ValidateAsync(A<CreatePaymentRequest>._, A<CancellationToken>._)).Returns(Task.FromResult(validationResult));
+            A.CallTo(() => _validator.ValidateAsync(A<CreatePaymentCommand>._, A<CancellationToken>._)).Returns(Task.FromResult(validationResult));
 
-            var paymentResponse = new PostPaymentResponse();
-            A.CallTo(() => _mediator.Send(request, A<CancellationToken>._)).Returns(paymentResponse);
+            var paymentResponse = new CreatePaymentResponse(Guid.NewGuid(), PaymentStatus.Authorized, 
+                "**** **** **** 3456", 12, 2089, "GBP", 100);
+
+            A.CallTo(() => _mediator.Send(createPaymentCommand, A<CancellationToken>._)).Returns(paymentResponse);
 
             // Act
-            var result = await _controller.CreatePaymentAsync(request);
+            var result = await _controller.CreatePaymentAsync(createPaymentCommand);
 
             // Assert
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
-            var okResult = result.Result as OkObjectResult;
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+            var okResult = result as OkObjectResult;
             Assert.That(okResult.Value, Is.EqualTo(paymentResponse));
         }
     }

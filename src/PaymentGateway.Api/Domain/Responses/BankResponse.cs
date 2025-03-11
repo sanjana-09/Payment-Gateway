@@ -1,7 +1,6 @@
 ﻿namespace PaymentGateway.Api.Domain.Responses;
 
-public class BankResponse
-{
-    public bool Authorized { get; set; }
-    public string Authorization_Code { get; set; }
-}
+public record BankResponse(
+    bool Authorized,
+    string Authorization_Code
+);

@@ -1,21 +1,22 @@
-﻿using FluentValidation.TestHelper;
-
+﻿using AutoFixture;
+using FluentValidation.TestHelper;
 using NUnit.Framework;
-
-using PaymentGateway.Api.Api.Validators;
 using PaymentGateway.Api.Application.Commands;
+using PaymentGateway.Api.Application.Commands.Validators;
 
-namespace PaymentGateway.Api.Tests.UnitTests.Api;
+namespace PaymentGateway.Api.Tests.UnitTests.Application;
 
 [TestFixture]
-public class CreatePaymentRequestValidatorTests
+public class CreatePaymentCommandValidatorTests
 {
-    private CreatePaymentRequestValidator _validator;
+    private CreatePaymentCommandValidator _validator;
+    private Fixture _fixture;
 
     [SetUp]
     public void Setup()
     {
-        _validator = new CreatePaymentRequestValidator();
+        _validator = new CreatePaymentCommandValidator();
+        _fixture = new Fixture();
     }
 
     #region Card Number
@@ -25,7 +26,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase(null)]
     public void Should_Have_Error_When_CardNumber_Is_Empty(string invalidCardNumber)
     {
-        var model = new CreatePaymentRequest { CardNumber = invalidCardNumber };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.CardNumber, invalidCardNumber).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -35,9 +36,9 @@ public class CreatePaymentRequestValidatorTests
 
     [TestCase("123456789012345678901")]
     [TestCase("123456")]
-    public void Should_Have_Error_When_CardNumber_Length_Is_Invalid(string cardNumber)
+    public void Should_Have_Error_When_CardNumber_Length_Is_Invalid(string invalidCardNumber)
     {
-        var model = new CreatePaymentRequest { CardNumber = cardNumber };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.CardNumber, invalidCardNumber).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -48,7 +49,7 @@ public class CreatePaymentRequestValidatorTests
     [Test]
     public void Should_Have_Error_When_CardNumber_Contains_NonNumeric_Characters()
     {
-        var model = new CreatePaymentRequest { CardNumber = "1234A567890" };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.CardNumber, "1234A567890").Create();
 
         var result = _validator.TestValidate(model);
 
@@ -59,7 +60,7 @@ public class CreatePaymentRequestValidatorTests
     [Test]
     public void Should_Not_Have_Error_When_CardNumber_Is_Valid()
     {
-        var model = new CreatePaymentRequest { CardNumber = "1234567890123456" };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.CardNumber, "1234567890123456").Create();
 
         var result = _validator.TestValidate(model);
 
@@ -74,7 +75,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase(13)]
     public void Should_Have_Error_When_ExpiryMonth_Is_Invalid(int invalidExpiryMonth)
     {
-        var model = new CreatePaymentRequest { ExpiryMonth = invalidExpiryMonth };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.ExpiryMonth, invalidExpiryMonth).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -85,7 +86,7 @@ public class CreatePaymentRequestValidatorTests
     [Test]
     public void Should_Have_Error_When_ExpiryYear_Is_In_Past()
     {
-        var model = new CreatePaymentRequest { ExpiryMonth = 12, ExpiryYear = DateTime.Now.Year - 1 };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.ExpiryYear, DateTime.Now.Year - 1).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -96,7 +97,8 @@ public class CreatePaymentRequestValidatorTests
     [Test]
     public void Should_Have_Error_When_ExpiryMonth_Is_In_The_Past_And_ExpiryYear_Is_Current()
     {
-        var model = new CreatePaymentRequest { ExpiryMonth = DateTime.Now.Month - 1, ExpiryYear = DateTime.Now.Year };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.ExpiryMonth, DateTime.Now.Month - 1)
+            .With(x => x.ExpiryYear, DateTime.Now.Year).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -107,7 +109,8 @@ public class CreatePaymentRequestValidatorTests
     [Test]
     public void Should_Pass_When_ExpiryMonth_Is_Current_Or_Future_And_ExpiryYear_Is_Current()
     {
-        var model = new CreatePaymentRequest { ExpiryMonth = DateTime.Now.Month, ExpiryYear = DateTime.Now.Year };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.ExpiryMonth, DateTime.Now.Month)
+            .With(x => x.ExpiryYear, DateTime.Now.Year).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -122,7 +125,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase("")]
     public void Should_Have_Error_When_Currency_Is_Invalid(string invalidCurrency)
     {
-        var model = new CreatePaymentRequest { Currency = invalidCurrency };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Currency, invalidCurrency).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -135,7 +138,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase("EUR")]
     public void Should_Pass_When_Currency_Is_Valid(string currency)
     {
-        var model = new CreatePaymentRequest { Currency = currency };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Currency, currency).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -151,7 +154,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase(0)]
     public void Should_Have_Error_When_Amount_Is_Invalid(int invalidAmount)
     {
-        var model = new CreatePaymentRequest { Amount = invalidAmount };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Amount, invalidAmount).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -168,7 +171,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase("")]
     public void Should_Have_Error_When_CVV_Is_Invalid(string invalidCvv)
     {
-        var model = new CreatePaymentRequest { Cvv = invalidCvv };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Cvv, invalidCvv).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -180,7 +183,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase("12c-")]
     public void Should_Have_Error_When_CVV_Is_Invalid_With_Non_Numeric_Chars(string invalidCvv)
     {
-        var model = new CreatePaymentRequest { Cvv = invalidCvv };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Cvv, invalidCvv).Create();
 
         var result = _validator.TestValidate(model);
 
@@ -192,7 +195,7 @@ public class CreatePaymentRequestValidatorTests
     [TestCase("1234")]
     public void Should_Pass_When_CVV_Is_Valid(string Cvv)
     {
-        var model = new CreatePaymentRequest { Cvv = Cvv };
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Cvv, Cvv).Create();
 
         var result = _validator.TestValidate(model);
 

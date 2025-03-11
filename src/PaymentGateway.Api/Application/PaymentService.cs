@@ -1,6 +1,6 @@
 ﻿using PaymentGateway.Api.Application.Common;
 using PaymentGateway.Api.Application.Queries;
-using PaymentGateway.Api.Domain;
+using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
 
 namespace PaymentGateway.Api.Application
@@ -35,21 +35,21 @@ namespace PaymentGateway.Api.Application
 
         private GetPaymentResponse CreateGetPaymentResponse(Payment payment)
         {
-            return new GetPaymentResponse()
-            {
-                Amount = payment.Amount,
-                CardNumberLastFour = payment.CardNumberLastFour,
-                Currency = payment.Currency,
-                ExpiryMonth = payment.ExpiryMonth,
-                ExpiryYear = payment.ExpiryYear,
-                Id = payment.Id,
-                Status = payment.Status switch
+            return new GetPaymentResponse(
+                Id: payment.Id,
+                Status: payment.Status switch
                 {
                     Payment.PaymentStatus.Authorized => PaymentStatus.Authorized,
                     Payment.PaymentStatus.Declined => PaymentStatus.Declined,
                     _ => PaymentStatus.Declined
-                }
-            };
+                },
+                CardNumberLastFour: payment.CardNumberLastFour,
+                ExpiryMonth: payment.ExpiryMonth,
+                ExpiryYear: payment.ExpiryYear,
+                Currency: payment.Currency,
+                Amount: payment.Amount
+            );
+
         }
     }
 }

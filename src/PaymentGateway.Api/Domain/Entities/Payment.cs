@@ -1,4 +1,4 @@
-﻿namespace PaymentGateway.Api.Domain;
+﻿namespace PaymentGateway.Api.Domain.Entities;
 
 public class Payment
 {

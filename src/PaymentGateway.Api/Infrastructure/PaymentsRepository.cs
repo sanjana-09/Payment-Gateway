@@ -1,4 +1,4 @@
-﻿using PaymentGateway.Api.Domain;
+﻿using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
 
 namespace PaymentGateway.Api.Infrastructure;

@@ -3,7 +3,7 @@ using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PaymentGateway.Api.Application.Commands;
-using PaymentGateway.Api.Application.Common;
+using PaymentGateway.Api.Application.Commands.Responses;
 
 namespace PaymentGateway.Api.Api.Controllers;
 
@@ -11,35 +11,34 @@ namespace PaymentGateway.Api.Api.Controllers;
 [ApiController]
 public class CreatePaymentsController : Controller
 {
-    private readonly IValidator<CreatePaymentRequest> _validator;
+    private readonly IValidator<CreatePaymentCommand> _validator;
     private readonly IMediator _mediator;
 
-    public CreatePaymentsController(IValidator<CreatePaymentRequest> validator, IMediator mediator)
+    public CreatePaymentsController(IValidator<CreatePaymentCommand> validator, IMediator mediator)
     {
         _validator = validator;
         _mediator = mediator;
     }
 
     [HttpPost]
-    public async Task<ActionResult<PostPaymentResponse>> CreatePaymentAsync([FromBody] CreatePaymentRequest request)
+    public async Task<ActionResult> CreatePaymentAsync([FromBody] CreatePaymentCommand command)
     {
-        var validationResult = await _validator.ValidateAsync(request);
+        var validationResult = await _validator.ValidateAsync(command);
         if (!validationResult.IsValid)
         {
             return RejectedPaymentResponse(validationResult);
         }
 
-        var response = await _mediator.Send(request);
+        var response = await _mediator.Send(command);
 
         return new OkObjectResult(response);
     }
 
-    private ActionResult<PostPaymentResponse> RejectedPaymentResponse(ValidationResult validationResult)
+    private ActionResult RejectedPaymentResponse(ValidationResult validationResult)
     {
-        return new BadRequestObjectResult(new
-        { 
-            Response = new PostPaymentResponse(){StatusCode = PaymentStatus.Rejected}, 
-            Errors = validationResult.Errors.Select(e => e.ErrorMessage) 
-        });
+        var errors = validationResult.Errors.Select(e =>  e.ErrorMessage);
+        var rejectedPaymentResponse = new RejectedPaymentResponse(Guid.NewGuid(), errors);
+
+        return new BadRequestObjectResult(rejectedPaymentResponse);
     }
 }

@@ -1,14 +1,11 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-
 using NUnit.Framework;
-
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Queries;
-using PaymentGateway.Api.Domain;
+using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
 using PaymentGateway.Api.Infrastructure;
 
