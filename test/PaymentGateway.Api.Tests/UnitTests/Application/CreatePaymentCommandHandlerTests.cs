@@ -1,16 +1,13 @@
 ﻿using AutoFixture;
-
 using FakeItEasy;
-
 using NUnit.Framework;
-
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Commands.Responses;
 using PaymentGateway.Api.Application.Common;
+using PaymentGateway.Api.Application.Queries;
+using PaymentGateway.Api.Domain.BankClient;
 using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
-using PaymentGateway.Api.Domain.Requests;
-using PaymentGateway.Api.Domain.Responses;
 
 namespace PaymentGateway.Api.Tests.UnitTests.Application;
 
@@ -18,7 +15,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Application;
 public class CreatePaymentCommandHandlerTests
 {
     private IPaymentsRepository _paymentsRepository;
-    private IBankSimulator _bankSimulator;
+    private IBankClient _bankClient;
     private CreatePaymentCommand _createPaymentCommand;
     private CreatePaymentCommandHandler _handler;
     private Fixture _fixture;
@@ -26,10 +23,10 @@ public class CreatePaymentCommandHandlerTests
     [SetUp]
     public void SetUp()
     {
-        _bankSimulator = A.Fake<IBankSimulator>();
+        _bankClient = A.Fake<IBankClient>();
         _paymentsRepository = A.Fake<IPaymentsRepository>();
 
-        _handler = new CreatePaymentCommandHandler(_bankSimulator, _paymentsRepository);
+        _handler = new CreatePaymentCommandHandler(_bankClient, _paymentsRepository);
 
         _fixture = new Fixture();
         _createPaymentCommand = _fixture.Build<CreatePaymentCommand>()
@@ -38,69 +35,71 @@ public class CreatePaymentCommandHandlerTests
     }
 
     [Test]
-    public async Task Return_authorized_response_when_bank_authorizes_payment()
+    public async Task Returns_authorized_response_when_bank_authorizes_payment()
     {
         // Arrange
         var bankResponse = new BankResponse(Authorized:true, Authorization_Code: "auth_code");
 
-        A.CallTo(() => _bankSimulator.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
+        A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
 
         // Act
         var response = await _handler.Handle(_createPaymentCommand, default);
+        var createPaymentResponse = response as CreatePaymentResponse;
 
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
         Then_the_payment_is_persisted(Payment.PaymentStatus.Authorized);
 
-        Then_the_response_contains_the_expected_information(response, _createPaymentCommand, PaymentStatus.Authorized);
+        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Authorized);
 
     }
 
     [Test]
-    public async Task Return_declined_response_when_bank_does_not_authorize_payment()
+    public async Task Returns_declined_response_when_bank_does_not_authorize_payment()
     {
         // Arrange
 
         var bankResponse = new BankResponse(Authorized: false, Authorization_Code: null);
 
-        A.CallTo(() => _bankSimulator.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
+        A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
 
         // Act
         var response = await _handler.Handle(_createPaymentCommand, default);
-
+        var createPaymentResponse = response as CreatePaymentResponse;
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
         Then_the_payment_is_persisted(Payment.PaymentStatus.Declined);
 
-        Then_the_response_contains_the_expected_information(response, _createPaymentCommand, PaymentStatus.Declined);
+        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Declined);
     }
 
     [Test]
-    public async Task Return_declined_response_when_bank_response_is_null()
+    public async Task Returns_declined_response_when_bank_response_is_null()
     {
         // Arrange
 
         BankResponse bankResponse = null;
 
-        A.CallTo(() => _bankSimulator.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
+        A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
 
         // Act
         var response = await _handler.Handle(_createPaymentCommand, default);
+        var createPaymentResponse = response as CreatePaymentResponse;
 
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
         Then_the_payment_is_persisted(Payment.PaymentStatus.Declined);
 
-        Then_the_response_contains_the_expected_information(response, _createPaymentCommand, PaymentStatus.Declined);
+        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Declined);
     }
 
     
     private void Then_a_request_is_made_to_the_bank_with_expected_information(CreatePaymentCommand command)
     {
-        A.CallTo(() => _bankSimulator.ProcessPaymentAsync(A<BankRequest>.That.Matches(br =>
+        A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>.That.Matches(br =>
                 br.Amount == command.Amount
                 && br.Card_Number == command.CardNumber
                 && br.Currency == command.Currency
@@ -112,7 +111,7 @@ public class CreatePaymentCommandHandlerTests
     private void Then_the_payment_is_persisted(Payment.PaymentStatus paymentStatus)
     {
         A.CallTo(() =>
-                _paymentsRepository.Add(A<Payment>.That.Matches(p => p.Status == paymentStatus)))
+                _paymentsRepository.AddAsync(A<Payment>.That.Matches(p => p.Status == paymentStatus)))
             .MustHaveHappenedOnceExactly();
     }
 

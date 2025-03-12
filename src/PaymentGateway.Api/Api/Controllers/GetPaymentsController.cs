@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PaymentGateway.Api.Application;
+﻿using MediatR;
+
+using Microsoft.AspNetCore.Mvc;
 using PaymentGateway.Api.Application.Queries;
 
 namespace PaymentGateway.Api.Api.Controllers;
@@ -8,17 +9,18 @@ namespace PaymentGateway.Api.Api.Controllers;
 [ApiController]
 public class GetPaymentsController : Controller
 {
-    private readonly IPaymentService _paymentService;
+    private readonly IMediator _mediator;
 
-    public GetPaymentsController(IPaymentService paymentService)
+    public GetPaymentsController(IMediator mediator)
     {
-        _paymentService = paymentService;
+        _mediator = mediator;
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<GetPaymentResponse?>> GetPaymentAsync(Guid id)
     {
-        var paymentResponse = await _paymentService.Get(id);
+        var getPaymentQuery = new GetPaymentQuery(id);
+        var paymentResponse = await _mediator.Send(getPaymentQuery);
 
         if (paymentResponse is null) return new NotFoundResult();
 

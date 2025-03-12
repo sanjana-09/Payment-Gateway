@@ -1,4 +1,4 @@
-﻿namespace PaymentGateway.Api.Domain.Requests;
+﻿namespace PaymentGateway.Api.Domain.BankClient;
 
 public record BankRequest(
     string Card_Number,

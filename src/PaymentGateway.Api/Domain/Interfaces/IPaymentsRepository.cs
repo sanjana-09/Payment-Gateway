@@ -4,6 +4,6 @@ namespace PaymentGateway.Api.Domain.Interfaces;
 
 public interface IPaymentsRepository
 {
-    void Add(Payment? payment);
-    Payment? Get(Guid id);
+    Task AddAsync(Payment? payment);
+    Task<Payment?> GetAsync(Guid id);
 }

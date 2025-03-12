@@ -47,7 +47,7 @@ public class GetPaymentsControllerTests
             Currency = "GBP"
         };
 
-        _paymentsRepository.Add(payment);
+        await _paymentsRepository.AddAsync(payment);
 
         // Act
         var response = await _client.GetAsync($"/api/GetPayments/{payment.Id}");

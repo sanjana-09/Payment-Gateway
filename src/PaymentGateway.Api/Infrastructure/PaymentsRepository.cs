@@ -8,13 +8,15 @@ public class PaymentsRepository : IPaymentsRepository
 {
     public List<Payment?> Payments = new();
     
-    public void Add(Payment? payment)
+    public async Task AddAsync(Payment? payment)
     {
-        Payments.Add(payment);
+       Payments.Add(payment);
+
+        await Task.CompletedTask;
     }
 
-    public Payment? Get(Guid id)
-    {
-        return Payments.FirstOrDefault(p => p.Id == id);
+    public async Task<Payment?> GetAsync(Guid id)
+    { 
+        return await Task.FromResult(Payments.FirstOrDefault(p => p.Id == id));
     }
 }

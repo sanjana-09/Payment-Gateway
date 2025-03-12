@@ -29,9 +29,15 @@ public class CreatePaymentsController : Controller
             return RejectedPaymentResponse(validationResult);
         }
 
-        var response = await _mediator.Send(command);
+        var paymentResponse = await _mediator.Send(command);
 
-        return new OkObjectResult(response);
+        return paymentResponse is null ? ErrorResponse() : new OkObjectResult(paymentResponse);
+    }
+
+    private ActionResult ErrorResponse()
+    {
+        return StatusCode(500, new { message = "Internal server error", 
+            details = "Something went wrong and the payment could not be processed. Please try again later." });
     }
 
     private ActionResult RejectedPaymentResponse(ValidationResult validationResult)

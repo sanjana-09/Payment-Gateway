@@ -1,9 +1,8 @@
-﻿using PaymentGateway.Api.Domain.Requests;
-using PaymentGateway.Api.Domain.Responses;
+﻿using PaymentGateway.Api.Domain.BankClient;
 
 namespace PaymentGateway.Api.Domain.Interfaces;
 
-public interface IBankSimulator
+public interface IBankClient
 {
     Task<BankResponse?> ProcessPaymentAsync(BankRequest bankRequest);
 }

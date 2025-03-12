@@ -71,7 +71,7 @@ public class CreatePaymentCommandValidatorTests
 
     #region Expiry Date
 
-    [TestCase(0)]
+    [TestCase(-12)]
     [TestCase(13)]
     public void Should_Have_Error_When_ExpiryMonth_Is_Invalid(int invalidExpiryMonth)
     {
@@ -121,8 +121,21 @@ public class CreatePaymentCommandValidatorTests
     #endregion
 
     #region Currency
-    [TestCase("XYZ")]
+
     [TestCase("")]
+    [TestCase(null)]
+    [TestCase("    ")]
+    public void Should_Have_Error_When_Currency_Is_Empty(string invalidCurrency)
+    {
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Currency, invalidCurrency).Create();
+
+        var result = _validator.TestValidate(model);
+
+        result.ShouldHaveValidationErrorFor(x => x.Currency)
+            .WithErrorMessage("Currency is required");
+    }
+
+    [TestCase("XYZ")]
     public void Should_Have_Error_When_Currency_Is_Invalid(string invalidCurrency)
     {
         var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Currency, invalidCurrency).Create();
@@ -130,7 +143,7 @@ public class CreatePaymentCommandValidatorTests
         var result = _validator.TestValidate(model);
 
         result.ShouldHaveValidationErrorFor(x => x.Currency)
-            .WithErrorMessage("Currency must be one of the valid ISO codes");
+            .WithErrorMessage("Currency must be one of 'GBP', or 'USD', or 'EUR' ");
     }
 
     [TestCase("GBP")]
@@ -150,25 +163,36 @@ public class CreatePaymentCommandValidatorTests
 
     #region Amount
 
-    [TestCase(-10)]
-    [TestCase(0)]
-    public void Should_Have_Error_When_Amount_Is_Invalid(int invalidAmount)
+    [Test]
+    public void Should_Have_Error_When_Amount_Is_Invalid()
     {
-        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Amount, invalidAmount).Create();
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Amount, -10).Create();
 
         var result = _validator.TestValidate(model);
 
         result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("Amount must be a positive integer");
+            .WithErrorMessage("Amount must be greater than 0");
     }
 
     #endregion
 
     #region Cvv
 
+    [TestCase("")]
+    [TestCase("   ")]
+    [TestCase(null)]
+    public void Should_Have_Error_When_CVV_Is_Empty(string invalidCvv)
+    {
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Cvv, invalidCvv).Create();
+
+        var result = _validator.TestValidate(model);
+
+        result.ShouldHaveValidationErrorFor(x => x.Cvv)
+            .WithErrorMessage("CVV is required");
+    }
+
     [TestCase("12347")]
     [TestCase("99")]
-    [TestCase("")]
     public void Should_Have_Error_When_CVV_Is_Invalid(string invalidCvv)
     {
         var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Cvv, invalidCvv).Create();

@@ -1,16 +1,12 @@
 using FluentValidation;
-
 using PaymentGateway.Api.Application;
 using PaymentGateway.Api.Application.Commands.Validators;
 using PaymentGateway.Api.Domain.Interfaces;
 using PaymentGateway.Api.Infrastructure;
 
+using Polly;
+
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-// Register IHttpClientFactory
-builder.Services.AddHttpClient();
-
 builder.Services.AddControllers();
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePaymentCommandValidator>();
 
@@ -19,15 +15,22 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPaymentsRepository, PaymentsRepository>();
-builder.Services.AddScoped<IBankSimulator, BankSimulator>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IBankClient, BankClient>();
+
+builder.Services.AddHttpClient<BankClient>(client =>
+    {
+        client.BaseAddress = new Uri("http://localhost:8080/payments");
+    })
+    .AddResilienceHandler("Timeout", resilienceBuilder =>
+    { 
+        resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(5));
+    });
 
 // Register MediatR
 builder.Services.ConfigureApplication();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

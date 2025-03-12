@@ -1,40 +1,48 @@
 ﻿using MediatR;
-
 using PaymentGateway.Api.Application.Commands.Responses;
 using PaymentGateway.Api.Application.Common;
+using PaymentGateway.Api.Domain.BankClient;
 using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
-using PaymentGateway.Api.Domain.Requests;
 
 namespace PaymentGateway.Api.Application.Commands
 {
-    public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand, CreatePaymentResponse>
+    public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand, CreatePaymentResponse?>
     {
-        private readonly IBankSimulator _bankSimulator;
+        private readonly IBankClient _bankClient;
         private readonly IPaymentsRepository _paymentsRepository;
 
-        public CreatePaymentCommandHandler(IBankSimulator bankSimulator, IPaymentsRepository paymentsRepository)
+        public CreatePaymentCommandHandler(IBankClient bankClient, IPaymentsRepository paymentsRepository)
         {
-            _bankSimulator = bankSimulator;
+            _bankClient = bankClient;
             _paymentsRepository = paymentsRepository;
         }
-        public async Task<CreatePaymentResponse> Handle(CreatePaymentCommand createPaymentCommand, CancellationToken cancellationToken)
+        public async Task<CreatePaymentResponse?> Handle(CreatePaymentCommand createPaymentCommand, CancellationToken cancellationToken)
         {
 
-            var bankPostPaymentRequest = CreateBankPaymentRequest(createPaymentCommand);
+            var bankPaymentRequest = CreateBankPaymentRequest(createPaymentCommand);
 
-            var bankResponse = await _bankSimulator.ProcessPaymentAsync(bankPostPaymentRequest);
+            try
+            {
+                var bankResponse = await _bankClient.ProcessPaymentAsync(bankPaymentRequest);
 
-            var payment = CreatePayment(createPaymentCommand);
+                var payment = CreatePayment(createPaymentCommand);
 
-            if (bankResponse is not null && bankResponse.Authorized)
-                payment.Authorized();
-            else
-                payment.Declined();
+                if (bankResponse is not null && bankResponse.Authorized)
+                    payment.Authorized();
+                else
+                    payment.Declined();
 
-            _paymentsRepository.Add(payment);
+                await _paymentsRepository.AddAsync(payment);
 
-            return CreatePostPaymentResponse(payment);
+                return CreatePaymentResponse(payment);
+            }
+
+            catch (Exception ex)
+            {
+                return null;
+            }
+
         }
 
         private BankRequest CreateBankPaymentRequest(CreatePaymentCommand createPaymentCommand)
@@ -63,7 +71,7 @@ namespace PaymentGateway.Api.Application.Commands
             };
         }
 
-        private CreatePaymentResponse CreatePostPaymentResponse(Payment payment)
+        private CreatePaymentResponse CreatePaymentResponse(Payment payment)
         {
             return new CreatePaymentResponse(
                 Id: payment.Id,
@@ -82,7 +90,7 @@ namespace PaymentGateway.Api.Application.Commands
 
         }
 
-        private static string MaskCardNumber(CreatePaymentCommand createPaymentCommand)
+        private string MaskCardNumber(CreatePaymentCommand createPaymentCommand)
         {
             var lastFour = int.Parse(createPaymentCommand.CardNumber.Substring(createPaymentCommand.CardNumber.Length - 4));
             return $"**** **** **** {lastFour}";

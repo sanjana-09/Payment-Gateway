@@ -1,36 +1,27 @@
-﻿using PaymentGateway.Api.Application.Common;
-using PaymentGateway.Api.Application.Queries;
+﻿using MediatR;
+
+using PaymentGateway.Api.Application.Common;
 using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
 
-namespace PaymentGateway.Api.Application
+namespace PaymentGateway.Api.Application.Queries
 {
-    public interface IPaymentService
-    {
-        Task<GetPaymentResponse?> Get(Guid id);
-    }
-    public class PaymentService: IPaymentService
+    public class GetPaymentQueryHandler : IRequestHandler<GetPaymentQuery, GetPaymentResponse?>
     {
         private readonly IPaymentsRepository _paymentsRepository;
-        public PaymentService(IPaymentsRepository paymentsRepository)
+
+        public GetPaymentQueryHandler(IPaymentsRepository paymentsRepository)
         {
             _paymentsRepository = paymentsRepository;
         }
 
-       
-        public async Task<GetPaymentResponse?> Get(Guid id)
+        public async Task<GetPaymentResponse?> Handle(GetPaymentQuery query, CancellationToken cancellationToken)
         {
             GetPaymentResponse? paymentResponse = null;
 
-            var payment = _paymentsRepository.Get(id);
+            var payment = await _paymentsRepository.GetAsync(query.Id);
 
-            if (payment is null)
-            {
-                return await Task.FromResult(paymentResponse) ;
-            }
-
-            return CreateGetPaymentResponse(payment);
-
+            return payment is null ? paymentResponse : CreateGetPaymentResponse(payment);
         }
 
         private GetPaymentResponse CreateGetPaymentResponse(Payment payment)
@@ -49,7 +40,6 @@ namespace PaymentGateway.Api.Application
                 Currency: payment.Currency,
                 Amount: payment.Amount
             );
-
         }
     }
 }
