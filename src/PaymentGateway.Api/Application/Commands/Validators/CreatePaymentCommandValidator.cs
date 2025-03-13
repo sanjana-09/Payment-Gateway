@@ -61,7 +61,7 @@ public class CreatePaymentCommandValidator : AbstractValidator<CreatePaymentComm
 
     private bool BeValidCurrency(string currency)
     {
-        var validCurrencies = new List<string> { "USD", "EUR", "GBP", "JPY" };
+        var validCurrencies = new List<string> { "USD", "EUR", "GBP"};
         return validCurrencies.Contains(currency);
     }
 

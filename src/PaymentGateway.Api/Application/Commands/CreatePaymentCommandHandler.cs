@@ -11,11 +11,13 @@ namespace PaymentGateway.Api.Application.Commands
     {
         private readonly IBankClient _bankClient;
         private readonly IPaymentsRepository _paymentsRepository;
+        private readonly ILogger<CreatePaymentCommandHandler> _logger;
 
-        public CreatePaymentCommandHandler(IBankClient bankClient, IPaymentsRepository paymentsRepository)
+        public CreatePaymentCommandHandler(IBankClient bankClient, IPaymentsRepository paymentsRepository, ILogger<CreatePaymentCommandHandler> logger)
         {
             _bankClient = bankClient;
             _paymentsRepository = paymentsRepository;
+            _logger = logger;
         }
         public async Task<CreatePaymentResponse?> Handle(CreatePaymentCommand createPaymentCommand, CancellationToken cancellationToken)
         {
@@ -40,6 +42,7 @@ namespace PaymentGateway.Api.Application.Commands
 
             catch (Exception ex)
             {
+                _logger.Log(LogLevel.Error, $"Payment processing failed with the error: {ex.Message}");
                 return null;
             }
 

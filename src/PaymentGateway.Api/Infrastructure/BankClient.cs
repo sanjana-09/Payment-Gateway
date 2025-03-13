@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-using PaymentGateway.Api.Domain.BankClient;
+﻿using PaymentGateway.Api.Domain.BankClient;
 using PaymentGateway.Api.Domain.Interfaces;
 
 namespace PaymentGateway.Api.Infrastructure
@@ -8,22 +6,35 @@ namespace PaymentGateway.Api.Infrastructure
     public class BankClient : IBankClient
     {
         private readonly HttpClient _httpClient;
+        private readonly ILogger<BankClient> _logger;
 
-        public BankClient(HttpClient httpClient)
+        public BankClient(HttpClient httpClient, ILogger<BankClient> logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
         }
 
         public async Task<BankResponse?> ProcessPaymentAsync(BankRequest bankRequest)
         {
-            var response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress, bankRequest);
-
-            if (response.StatusCode == HttpStatusCode.OK)
+            try
             {
-                return await response.Content.ReadFromJsonAsync<BankResponse>();
+                var response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress, bankRequest);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<BankResponse>();
+                }
+
+                return null;
+
             }
 
-            return null;
+            catch (Exception ex)
+            {
+                _logger.LogInformation("Hello");
+                _logger.LogError($"Failed to communicate with acquiring bank with the error: {ex.Message}"); 
+                throw ex;
+            }
 
         }
     }

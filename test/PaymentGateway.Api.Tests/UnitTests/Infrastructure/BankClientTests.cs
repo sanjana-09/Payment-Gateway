@@ -2,8 +2,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using FakeItEasy;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
-
 using PaymentGateway.Api.Domain.BankClient;
 using PaymentGateway.Api.Domain.Interfaces;
 using PaymentGateway.Api.Infrastructure;
@@ -13,15 +13,17 @@ namespace PaymentGateway.Api.Tests.UnitTests.Infrastructure
     public class BankClientTests
     {
         private IBankClient _bankClient;
+        private ILogger<BankClient> _logger;
         private HttpClient _httpClient;
         private BankRequest _bankRequest;
 
         [SetUp]
         public void Setup()
         {
+            _logger = A.Fake<ILogger<BankClient>>();
             _httpClient = new HttpClient();
 
-            _bankClient = new BankClient(_httpClient);
+            _bankClient = new BankClient(_httpClient, _logger);
 
             _bankRequest = new BankRequest(
                 Card_Number: "1234567812345678",
