@@ -19,8 +19,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreatePaymentCommandValidat
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IPaymentsRepository, PaymentsRepository>();
-builder.Services.AddScoped<IBankClient, BankClient>();
+builder.Services.AddSingleton<IPaymentsRepository, PaymentsRepository>();
+builder.Services.AddSingleton<IBankClient, BankClient>();
 
 builder.Services.AddHttpClient<IBankClient, BankClient>(client =>
 {
