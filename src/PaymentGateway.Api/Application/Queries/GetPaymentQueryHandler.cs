@@ -26,7 +26,7 @@ namespace PaymentGateway.Api.Application.Queries
         {
             return new GetPaymentResponse(
                 Id: payment.Id,
-                Status: payment.Status switch
+                PaymentStatusCode: payment.Status switch
                 {
                     Payment.PaymentStatus.Authorized => PaymentStatus.Authorized,
                     Payment.PaymentStatus.Declined => PaymentStatus.Declined,

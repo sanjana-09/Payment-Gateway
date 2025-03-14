@@ -1,5 +1,4 @@
 ﻿using AutoFixture;
-
 using FakeItEasy;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

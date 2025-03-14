@@ -6,6 +6,8 @@ public class CreatePaymentCommandValidator : AbstractValidator<CreatePaymentComm
 {
     public CreatePaymentCommandValidator()
     {
+        RuleFor(x => x.Id).NotEmpty().WithMessage("Id is required");
+
         RuleFor(x => x.CardNumber)
             .NotEmpty().WithMessage("Card number is required")
             .DependentRules(() =>

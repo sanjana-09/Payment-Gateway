@@ -2,13 +2,16 @@
 
 public record GetPaymentResponse(
     Guid Id,
-    PaymentStatus Status,
+    PaymentStatus PaymentStatusCode,
     string CardNumberLastFour,
     int ExpiryMonth,
     int ExpiryYear,
     string Currency,
     int Amount
-);
+)
+{
+    public string Status => PaymentStatusCode.ToString();
+}
 
 public enum PaymentStatus
 {

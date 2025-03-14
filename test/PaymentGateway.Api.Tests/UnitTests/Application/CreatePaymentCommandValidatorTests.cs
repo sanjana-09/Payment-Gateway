@@ -19,6 +19,27 @@ public class CreatePaymentCommandValidatorTests
         _fixture = new Fixture();
     }
 
+    #region Id
+
+    [Test]
+    public void Should_Have_Error_When_Id_Is_Empty()
+    {
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Id, Guid.Empty).Create();
+        var result = _validator.TestValidate(model);
+        result.ShouldHaveValidationErrorFor(x => x.Id)
+            .WithErrorMessage("Id is required");
+    }
+
+    [Test]
+    public void Should_Pass_When_Id_Is_Valid()
+    {
+        var model = _fixture.Build<CreatePaymentCommand>().With(x => x.Id, Guid.NewGuid).Create();
+        var result = _validator.TestValidate(model);
+        result.ShouldNotHaveValidationErrorFor(x => x.Id);
+    }
+
+    #endregion
+
     #region Card Number
 
     [TestCase("")]

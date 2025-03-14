@@ -45,7 +45,8 @@ public class GetPaymentControllerTests
             ExpiryMonth = _random.Next(1, 12),
             Amount = _random.Next(1, 10000),
             CardNumberLastFour = $"**** **** **** **** {_random.Next(1111, 9999)}",
-            Currency = "GBP"
+            Currency = "GBP",
+            Status = Payment.PaymentStatus.Authorized
         };
 
         await _paymentsRepository.AddAsync(payment);
@@ -55,8 +56,7 @@ public class GetPaymentControllerTests
         var paymentResponse = await response.Content.ReadFromJsonAsync<GetPaymentResponse>();
 
         // Assert
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        Assert.That(paymentResponse, Is.Not.Null);
+        Then_the_response_is_200_OK_with_the_expected_details(response, paymentResponse, payment);
     }
 
     [Test]
@@ -67,5 +67,22 @@ public class GetPaymentControllerTests
 
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+    }
+    
+    private void Then_the_response_is_200_OK_with_the_expected_details(HttpResponseMessage response,
+        GetPaymentResponse? paymentResponse, Payment payment)
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(paymentResponse, Is.Not.Null);
+            Assert.That(paymentResponse.Id, Is.EqualTo(payment.Id));
+            Assert.That(paymentResponse.Amount, Is.EqualTo(payment.Amount));
+            Assert.That(paymentResponse.Currency, Is.EqualTo(payment.Currency));
+            Assert.That(paymentResponse.ExpiryMonth, Is.EqualTo(payment.ExpiryMonth));
+            Assert.That(paymentResponse.ExpiryYear, Is.EqualTo(payment.ExpiryYear));
+            Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo(payment.CardNumberLastFour));
+            Assert.That(paymentResponse.PaymentStatusCode, Is.EqualTo(PaymentStatus.Authorized));
+        });
     }
 }
