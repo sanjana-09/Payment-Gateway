@@ -12,20 +12,21 @@ using PaymentGateway.Api.Infrastructure;
 namespace PaymentGateway.Api.Tests.IntegrationTests;
 
 [TestFixture]
-public class GetPaymentsControllerTests
+public class GetPaymentControllerTests
 {
     private readonly Random _random = new();
     private IPaymentsRepository _paymentsRepository;
-    private WebApplicationFactory<GetPaymentsController> _factory;
+    private WebApplicationFactory<GetPaymentController> _factory;
     private HttpClient _client;
 
     [SetUp]
     public void Setup()
     {
-        _factory = new WebApplicationFactory<GetPaymentsController>()
+        _factory = new WebApplicationFactory<GetPaymentController>()
             .WithWebHostBuilder(builder =>
             builder.ConfigureServices(services =>
             {
+                services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetPaymentController).Assembly));
                 services.AddSingleton<IPaymentsRepository, PaymentsRepository>();
             }));
         _client = _factory.CreateClient();
@@ -50,11 +51,11 @@ public class GetPaymentsControllerTests
         await _paymentsRepository.AddAsync(payment);
 
         // Act
-        var response = await _client.GetAsync($"/api/GetPayments/{payment.Id}");
+        var response = await _client.GetAsync($"/api/GetPayment/{payment.Id}");
         var paymentResponse = await response.Content.ReadFromJsonAsync<GetPaymentResponse>();
 
         // Assert
-        Assert.That(HttpStatusCode.OK, Is.EqualTo(response.StatusCode));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         Assert.That(paymentResponse, Is.Not.Null);
     }
 
@@ -62,7 +63,7 @@ public class GetPaymentsControllerTests
     public async Task Returns404IfPaymentNotFound()
     {
         // Act
-        var response = await _client.GetAsync($"/api/GetPayments/{Guid.NewGuid()}");
+        var response = await _client.GetAsync($"/api/GetPayment/{Guid.NewGuid()}");
 
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));

@@ -1,6 +1,4 @@
-﻿using PaymentGateway.Api.Application.Common;
-
-namespace PaymentGateway.Api.Application.Commands.Responses;
+﻿namespace PaymentGateway.Api.Application.Commands.Responses;
 
 public record CreatePaymentResponse(
     Guid Id,
@@ -14,5 +12,12 @@ public record CreatePaymentResponse(
 {
     public string Status => PaymentStatusCode.ToString();
 
+}
+
+public enum PaymentStatus
+{
+    Authorized,
+    Declined,
+    Rejected
 }
 

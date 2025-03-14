@@ -1,6 +1,4 @@
-﻿using PaymentGateway.Api.Application.Common;
-
-namespace PaymentGateway.Api.Application.Queries;
+﻿namespace PaymentGateway.Api.Application.Queries;
 
 public record GetPaymentResponse(
     Guid Id,
@@ -11,3 +9,9 @@ public record GetPaymentResponse(
     string Currency,
     int Amount
 );
+
+public enum PaymentStatus
+{
+    Authorized,
+    Declined
+}

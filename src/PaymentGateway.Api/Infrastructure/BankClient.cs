@@ -31,7 +31,6 @@ namespace PaymentGateway.Api.Infrastructure
 
             catch (Exception ex)
             {
-                _logger.LogInformation("Hello");
                 _logger.LogError($"Failed to communicate with acquiring bank with the error: {ex.Message}"); 
                 throw ex;
             }

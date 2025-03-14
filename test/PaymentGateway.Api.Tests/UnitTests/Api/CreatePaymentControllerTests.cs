@@ -7,17 +7,16 @@ using NUnit.Framework;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Commands.Responses;
-using PaymentGateway.Api.Application.Common;
 
 namespace PaymentGateway.Api.Tests.UnitTests.Api
 {
     [TestFixture]
-    public class CreatePaymentsControllerTests
+    public class CreatePaymentControllerTests
     { 
         private IValidator<CreatePaymentCommand> _validator;
         private IMediator _mediator;
 
-        private CreatePaymentsController _controller;
+        private CreatePaymentController _controller;
 
         [SetUp]
         public void Setup()
@@ -25,7 +24,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             _validator = A.Fake<IValidator<CreatePaymentCommand>>();
             _mediator = A.Fake<IMediator>();
 
-            _controller = new CreatePaymentsController(_validator, _mediator);
+            _controller = new CreatePaymentController(_validator, _mediator);
         }
 
         [Test]

@@ -1,6 +1,4 @@
 ﻿using MediatR;
-
-using PaymentGateway.Api.Application.Common;
 using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
 

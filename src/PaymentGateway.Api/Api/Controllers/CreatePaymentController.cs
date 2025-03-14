@@ -9,12 +9,12 @@ namespace PaymentGateway.Api.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CreatePaymentsController : Controller
+public class CreatePaymentController : Controller
 {
     private readonly IValidator<CreatePaymentCommand> _validator;
     private readonly IMediator _mediator;
 
-    public CreatePaymentsController(IValidator<CreatePaymentCommand> validator, IMediator mediator)
+    public CreatePaymentController(IValidator<CreatePaymentCommand> validator, IMediator mediator)
     {
         _validator = validator;
         _mediator = mediator;

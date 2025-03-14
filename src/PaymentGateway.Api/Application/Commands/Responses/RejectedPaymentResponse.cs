@@ -1,6 +1,4 @@
-﻿using PaymentGateway.Api.Application.Common;
-
-namespace PaymentGateway.Api.Application.Commands.Responses;
+﻿namespace PaymentGateway.Api.Application.Commands.Responses;
 
 public record RejectedPaymentResponse(Guid Id, IEnumerable<string> Errors)
 {

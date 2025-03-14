@@ -1,12 +1,9 @@
 ﻿using AutoFixture;
 using FakeItEasy;
-
 using Microsoft.Extensions.Logging;
-
 using NUnit.Framework;
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Commands.Responses;
-using PaymentGateway.Api.Application.Common;
 using PaymentGateway.Api.Domain.BankClient;
 using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;

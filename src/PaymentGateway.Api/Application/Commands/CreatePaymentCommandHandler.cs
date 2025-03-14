@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using PaymentGateway.Api.Application.Commands.Responses;
-using PaymentGateway.Api.Application.Common;
 using PaymentGateway.Api.Domain.BankClient;
 using PaymentGateway.Api.Domain.Entities;
 using PaymentGateway.Api.Domain.Interfaces;
