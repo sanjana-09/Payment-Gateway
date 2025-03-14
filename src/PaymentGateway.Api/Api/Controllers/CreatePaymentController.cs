@@ -26,7 +26,7 @@ public class CreatePaymentController : Controller
         var validationResult = await _validator.ValidateAsync(command);
         if (!validationResult.IsValid)
         {
-            return RejectedPaymentResponse(validationResult);
+            return RejectedPaymentResponse(validationResult, command.Id);
         }
 
         var paymentResponse = await _mediator.Send(command);
@@ -40,10 +40,10 @@ public class CreatePaymentController : Controller
             details = "Something went wrong and the payment could not be processed. Please try again later." });
     }
 
-    private ActionResult RejectedPaymentResponse(ValidationResult validationResult)
+    private ActionResult RejectedPaymentResponse(ValidationResult validationResult, Guid id)
     {
         var errors = validationResult.Errors.Select(e =>  e.ErrorMessage);
-        var rejectedPaymentResponse = new RejectedPaymentResponse(Guid.NewGuid(), errors);
+        var rejectedPaymentResponse = new RejectedPaymentResponse(id, errors);
 
         return new BadRequestObjectResult(rejectedPaymentResponse);
     }

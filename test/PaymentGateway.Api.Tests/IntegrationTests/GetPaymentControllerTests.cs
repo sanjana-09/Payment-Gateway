@@ -56,7 +56,9 @@ public class GetPaymentControllerTests
         var paymentResponse = await response.Content.ReadFromJsonAsync<GetPaymentResponse>();
 
         // Assert
-        Then_the_response_is_200_OK_with_the_expected_details(response, paymentResponse, payment);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(paymentResponse, Is.Not.Null);
+        Then_the_response_is_200_OK_with_the_expected_details(paymentResponse, payment);
     }
 
     [Test]
@@ -69,13 +71,11 @@ public class GetPaymentControllerTests
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
     }
     
-    private void Then_the_response_is_200_OK_with_the_expected_details(HttpResponseMessage response,
+    private void Then_the_response_is_200_OK_with_the_expected_details(
         GetPaymentResponse? paymentResponse, Payment payment)
     {
         Assert.Multiple(() =>
         {
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(paymentResponse, Is.Not.Null);
             Assert.That(paymentResponse.Id, Is.EqualTo(payment.Id));
             Assert.That(paymentResponse.Amount, Is.EqualTo(payment.Amount));
             Assert.That(paymentResponse.Currency, Is.EqualTo(payment.Currency));
