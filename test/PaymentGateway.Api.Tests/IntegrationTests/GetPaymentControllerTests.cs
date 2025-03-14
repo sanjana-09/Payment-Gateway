@@ -58,7 +58,7 @@ public class GetPaymentControllerTests
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         Assert.That(paymentResponse, Is.Not.Null);
-        Then_the_response_is_200_OK_with_the_expected_details(paymentResponse, payment);
+        Then_the_response_contains_the_expected_details(paymentResponse, payment);
     }
 
     [Test]
@@ -70,8 +70,9 @@ public class GetPaymentControllerTests
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
     }
-    
-    private void Then_the_response_is_200_OK_with_the_expected_details(
+
+    #region Helper methods
+    private void Then_the_response_contains_the_expected_details(
         GetPaymentResponse? paymentResponse, Payment payment)
     {
         Assert.Multiple(() =>
@@ -83,6 +84,8 @@ public class GetPaymentControllerTests
             Assert.That(paymentResponse.ExpiryYear, Is.EqualTo(payment.ExpiryYear));
             Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo(payment.CardNumberLastFour));
             Assert.That(paymentResponse.PaymentStatusCode, Is.EqualTo(PaymentStatus.Authorized));
+            Assert.That(paymentResponse.Status, Is.EqualTo(PaymentStatus.Authorized.ToString()));
         });
     }
+    #endregion
 }

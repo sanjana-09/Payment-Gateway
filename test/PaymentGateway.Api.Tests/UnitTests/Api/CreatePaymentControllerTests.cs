@@ -64,7 +64,9 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             // Act
             var result = await _controller.CreatePaymentAsync(createPaymentCommand);
 
-            Then_200_Ok_is_returned_with_create_payment_response_with_expected_information(result, expectedPaymentResponse);
+            //Assert
+            A.CallTo(() => _mediator.Send(createPaymentCommand, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+            Then_200_OK_with_with_expected_payment_information_is_returned(result, expectedPaymentResponse);
         }
 
         [Test]
@@ -83,7 +85,6 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
 
             // Assert
             A.CallTo(() => _mediator.Send(createPaymentCommand, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-
             Then_a_500_InternalServerError_is_returned(result);
         }
 
@@ -112,8 +113,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             Assert.That(rejectedPaymentResponse.Status, Is.EqualTo(PaymentStatus.Rejected.ToString()));
         }
 
-        private void Then_200_Ok_is_returned_with_create_payment_response_with_expected_information(ActionResult? result,
-            CreatePaymentResponse expectedPaymentResponse)
+        private void Then_200_OK_with_with_expected_payment_information_is_returned(ActionResult? result, CreatePaymentResponse expectedPaymentResponse)
         {
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;

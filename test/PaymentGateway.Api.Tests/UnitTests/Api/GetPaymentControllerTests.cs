@@ -26,13 +26,16 @@ public class GetPaymentControllerTests
     [Test]
     public async Task Return_200_OK_with_payment_details_when_it_exists()
     {
+        //Arrange
         var paymentId = Guid.NewGuid();
         var expectedResponse = _fixture.Create<GetPaymentResponse>();
 
         A.CallTo(() => _mediator.Send(A<GetPaymentQuery>._, A<CancellationToken>._)).Returns(expectedResponse);
 
+        //Act
         var result = await _controller.GetPaymentAsync(paymentId);
 
+        //Assert
         A.CallTo(() => _mediator.Send(A<GetPaymentQuery>.That.Matches(q => q.Id == paymentId), A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 
@@ -44,14 +47,17 @@ public class GetPaymentControllerTests
     [Test]
     public async Task Returns_404_when_payment_does_not_exist()
     {
+        //Arrange
         GetPaymentResponse? response = null;
 
         var paymentId = Guid.NewGuid();
 
         A.CallTo(() => _mediator.Send(A<GetPaymentQuery>.Ignored, A<CancellationToken>._))!.Returns(response);
 
+        //Act
         var result = await _controller.GetPaymentAsync(paymentId);
 
+        //Assert
         A.CallTo(() => _mediator.Send(A<GetPaymentQuery>.That.Matches(q => q.Id == paymentId), A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 

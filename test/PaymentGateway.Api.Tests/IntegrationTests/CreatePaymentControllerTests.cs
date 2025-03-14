@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,62 +46,55 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
 
             // Assert
 
-            Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.BadRequest));
-
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             var rejectedPaymentResponse = await response.Content.ReadFromJsonAsync<RejectedPaymentResponse>();
+
             Assert.That(rejectedPaymentResponse, Is.Not.Null);
             Assert.That(rejectedPaymentResponse.Errors, Is.Not.Empty);
             Assert.That(rejectedPaymentResponse.Status, Is.EqualTo(PaymentStatus.Rejected.ToString()));
         }
 
-        //[Test]
-        //public async Task CreatePayment_Returns_InternalServerError_When_Processing_Fails()
-        //{
-        //    // Arrange
-        //    var validCommand = new CreatePaymentCommand
-        //    {
-        //        // Provide valid data for testing success
-        //    };
+        [Test]
+        public async Task Returns_200_OK_with_expected_payment_details_when_command_is_valid()
+        {
+            var validCommand = new CreatePaymentCommand(
+                Guid.NewGuid(),
+                "1234567812345678",
+                12,
+                2025,
+                "USD",
+                100,
+                "123"
+            );
 
-        //    var content = new StringContent(JsonConvert.SerializeObject(validCommand), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonConvert.SerializeObject(validCommand), Encoding.UTF8, "application/json");
 
-        //    // Simulate a failure scenario (e.g., Mediator returning null or throwing exception)
+            var response = await _client.PostAsync("/api/CreatePayment", content);
 
-        //    var response = await _client.PostAsync("/api/CreatePayment", content);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            var paymentResponse = await response.Content.ReadFromJsonAsync<CreatePaymentResponse>();
+            Assert.That(paymentResponse, Is.Not.Null);
 
-        //    // Assert
-        //    response.StatusCode.Should().Be(System.Net.HttpStatusCode.InternalServerError);
+            Then_the_response_contains_the_expected_payment_details(paymentResponse, validCommand);
+        }
 
-        //    var responseBody = await response.Content.ReadAsStringAsync();
-        //    var errorResponse = JsonConvert.DeserializeObject<dynamic>(responseBody);
+        #region Helper methods
+        private void Then_the_response_contains_the_expected_payment_details(CreatePaymentResponse? paymentResponse,
+            CreatePaymentCommand validCommand)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(paymentResponse.Id, Is.EqualTo(validCommand.Id));
+                Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo("**** **** **** 5678"));
+                Assert.That(paymentResponse.ExpiryMonth, Is.EqualTo(validCommand.ExpiryMonth));
+                Assert.That(paymentResponse.ExpiryYear, Is.EqualTo(validCommand.ExpiryYear));
+                Assert.That(paymentResponse.Currency, Is.EqualTo(validCommand.Currency));
+                Assert.That(paymentResponse.Amount, Is.EqualTo(validCommand.Amount));
+            });
+        }
 
-        //    errorResponse.message.Should().Be("Internal server error");
-        //    errorResponse.details.Should().Be("Something went wrong and the payment could not be processed. Please try again later.");
-        //}
 
-        //[Test]
-        //public async Task CreatePayment_Returns_200_OK_When_Command_Is_Valid()
-        //{
-        //    // Arrange
-        //    var validCommand = new CreatePaymentCommand
-        //    {
-        //        // Provide valid data for testing success
-        //    };
-
-        //    var content = new StringContent(JsonConvert.SerializeObject(validCommand), Encoding.UTF8, "application/json");
-
-        //    // Act
-        //    var response = await _client.PostAsync("/api/CreatePayment", content);
-
-        //    // Assert
-        //    response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
-
-        //    var responseBody = await response.Content.ReadAsStringAsync();
-        //    var paymentResponse = JsonConvert.DeserializeObject<CreatePaymentResponse>(responseBody);
-
-        //    paymentResponse.Should().NotBeNull();
-        //    paymentResponse.PaymentId.Should().NotBeEmpty();
-        //}
+        #endregion
     }
 }
 
