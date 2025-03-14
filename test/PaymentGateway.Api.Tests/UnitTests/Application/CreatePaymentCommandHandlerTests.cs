@@ -49,7 +49,7 @@ public class CreatePaymentCommandHandlerTests
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
-        Then_the_payment_is_persisted(Payment.PaymentStatus.Authorized);
+        Then_the_payment_is_persisted(Payment.PaymentStatus.Authorized, _createPaymentCommand);
 
         Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Authorized);
 
@@ -69,7 +69,7 @@ public class CreatePaymentCommandHandlerTests
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
-        Then_the_payment_is_persisted(Payment.PaymentStatus.Declined);
+        Then_the_payment_is_persisted(Payment.PaymentStatus.Declined, _createPaymentCommand);
 
         Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Declined);
     }
@@ -88,7 +88,7 @@ public class CreatePaymentCommandHandlerTests
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
-        Then_the_payment_is_persisted(Payment.PaymentStatus.Declined);
+        Then_the_payment_is_persisted(Payment.PaymentStatus.Declined, _createPaymentCommand);
 
         Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Declined);
     }
@@ -97,7 +97,8 @@ public class CreatePaymentCommandHandlerTests
     private void Then_a_request_is_made_to_the_bank_with_expected_information(CreatePaymentCommand command)
     {
         A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>.That.Matches(br =>
-                br.Amount == command.Amount
+                br.PaymentId == command.Id
+                && br.Amount == command.Amount
                 && br.Card_Number == command.CardNumber
                 && br.Currency == command.Currency
                 && br.Cvv == command.Cvv
@@ -105,10 +106,17 @@ public class CreatePaymentCommandHandlerTests
             .MustHaveHappenedOnceExactly();
     }
 
-    private void Then_the_payment_is_persisted(Payment.PaymentStatus paymentStatus)
+    private void Then_the_payment_is_persisted(Payment.PaymentStatus paymentStatus, CreatePaymentCommand createPaymentCommand)
     {
         A.CallTo(() =>
-                _paymentsRepository.AddAsync(A<Payment>.That.Matches(p => p.Status == paymentStatus)))
+                _paymentsRepository.AddAsync(A<Payment>.That.Matches(p => 
+                    p.Id == createPaymentCommand.Id 
+                    && p.Amount == createPaymentCommand.Amount
+                    && p.Currency == createPaymentCommand.Currency
+                    && p.ExpiryMonth == createPaymentCommand.ExpiryMonth
+                    && p.ExpiryYear == createPaymentCommand.ExpiryYear
+                    && p.CardNumberLastFour == "**** **** **** 4567"
+                    && p.Status.ToString() == paymentStatus.ToString())))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -118,6 +126,7 @@ public class CreatePaymentCommandHandlerTests
         Assert.Multiple(() =>
         {
             Assert.That(response, Is.Not.Null);
+            Assert.That(response.Id, Is.EqualTo(command.Id));
             Assert.That(response.PaymentStatusCode, Is.EqualTo(paymentStatus));
             Assert.That(response.Amount, Is.EqualTo(command.Amount));
             Assert.That(response.Currency, Is.EqualTo(command.Currency));

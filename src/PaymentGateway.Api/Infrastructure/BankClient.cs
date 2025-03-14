@@ -19,6 +19,7 @@ namespace PaymentGateway.Api.Infrastructure
             try
             {
                 var response = await _httpClient.PostAsJsonAsync(_httpClient.BaseAddress, bankRequest);
+                _logger.LogInformation($"Bank response status code for paymentId {bankRequest}: {response.StatusCode}");
 
                 if (response.IsSuccessStatusCode)
                 {

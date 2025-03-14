@@ -50,6 +50,7 @@ namespace PaymentGateway.Api.Application.Commands
         private BankRequest CreateBankPaymentRequest(CreatePaymentCommand createPaymentCommand)
         {
             return new BankRequest(
+                PaymentId: createPaymentCommand.Id,
                 Card_Number: createPaymentCommand.CardNumber,
                 Expiry_Date: $"{createPaymentCommand.ExpiryMonth}/{createPaymentCommand.ExpiryYear}",
                 Currency: createPaymentCommand.Currency,
@@ -63,7 +64,7 @@ namespace PaymentGateway.Api.Application.Commands
         {
             return new Payment()
             {
-                Id = Guid.NewGuid(),
+                Id = createPaymentCommand.Id,
                 Amount = createPaymentCommand.Amount,
                 Currency = createPaymentCommand.Currency,
                 ExpiryMonth = createPaymentCommand.ExpiryMonth,

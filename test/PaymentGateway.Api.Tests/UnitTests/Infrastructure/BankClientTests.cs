@@ -26,6 +26,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Infrastructure
             _bankClient = new BankClient(_httpClient, _logger);
 
             _bankRequest = new BankRequest(
+                PaymentId: Guid.NewGuid(), 
                 Card_Number: "1234567812345678",
                 Expiry_Date: "12/2025",
                 Currency: "USD",

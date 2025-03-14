@@ -1,4 +1,6 @@
-﻿using FakeItEasy;
+﻿using AutoFixture;
+
+using FakeItEasy;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
@@ -15,6 +17,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
     { 
         private IValidator<CreatePaymentCommand> _validator;
         private IMediator _mediator;
+        private Fixture _fixture;
 
         private CreatePaymentController _controller;
 
@@ -23,6 +26,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
         {
             _validator = A.Fake<IValidator<CreatePaymentCommand>>();
             _mediator = A.Fake<IMediator>();
+            _fixture = new Fixture();
 
             _controller = new CreatePaymentController(_validator, _mediator);
         }
@@ -33,7 +37,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             // Arrange
             Given_command_validation_fails();
 
-            var createPaymentCommand = new CreatePaymentCommand("1234567812345678", 12, 2025, "USD", 1000, "123");
+            var createPaymentCommand = _fixture.Create<CreatePaymentCommand>();
 
             // Act
             var result = await _controller.CreatePaymentAsync(createPaymentCommand);
@@ -51,7 +55,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             // Arrange
             Given_command_validation_succeeds();
 
-            var createPaymentCommand = new CreatePaymentCommand("1234567812345678", 12, 2025, "USD", 1000, "123");
+            var createPaymentCommand = _fixture.Create<CreatePaymentCommand>();
             var expectedPaymentResponse = new CreatePaymentResponse(Guid.NewGuid(), PaymentStatus.Authorized, 
                 "**** **** **** 5678", 12, 2025, "USD", 1000);
 
@@ -69,8 +73,8 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             // Arrange
             Given_command_validation_succeeds();
 
-            var createPaymentCommand = new CreatePaymentCommand("1234567812345678", 12, 2025, "USD", 1000, "123");
-            CreatePaymentResponse nullResponse = null;
+            var createPaymentCommand = _fixture.Create<CreatePaymentCommand>();
+            CreatePaymentResponse? nullResponse = null;
 
             A.CallTo(() => _mediator.Send(A<CreatePaymentCommand>._, A<CancellationToken>._))!.Returns(nullResponse);
 

@@ -4,6 +4,7 @@ using PaymentGateway.Api.Application.Commands.Responses;
 namespace PaymentGateway.Api.Application.Commands;
 
 public record CreatePaymentCommand(
+    Guid Id,
     string CardNumber,
     int ExpiryMonth,
     int ExpiryYear,
