@@ -49,9 +49,9 @@ public class CreatePaymentCommandHandlerTests
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
-        Then_the_payment_is_persisted(Payment.PaymentStatus.Authorized, _createPaymentCommand);
+        Then_the_payment_is_persisted(bankResponse, _createPaymentCommand);
 
-        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Authorized);
+        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, bankResponse);
 
     }
 
@@ -59,7 +59,7 @@ public class CreatePaymentCommandHandlerTests
     public async Task Returns_declined_response_when_bank_does_not_authorize_payment()
     {
         // Arrange
-        var bankResponse = new BankResponse(Authorized: false, Authorization_Code: null);
+        var bankResponse = new BankResponse(Authorized: false, Authorization_Code: null){Reason = "Service Unavailable"};
 
         A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
 
@@ -69,9 +69,9 @@ public class CreatePaymentCommandHandlerTests
         // Assert
         Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
 
-        Then_the_payment_is_persisted(Payment.PaymentStatus.Declined, _createPaymentCommand);
+        Then_the_payment_is_persisted(bankResponse, _createPaymentCommand);
 
-        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Declined);
+        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, bankResponse);
     }
 
     private void Then_a_request_is_made_to_the_bank_with_expected_information(CreatePaymentCommand command)
@@ -86,7 +86,7 @@ public class CreatePaymentCommandHandlerTests
             .MustHaveHappenedOnceExactly();
     }
 
-    private void Then_the_payment_is_persisted(Payment.PaymentStatus paymentStatus, CreatePaymentCommand createPaymentCommand)
+    private void Then_the_payment_is_persisted(BankResponse bankResponse, CreatePaymentCommand createPaymentCommand)
     {
         A.CallTo(() =>
                 _paymentsRepository.AddAsync(A<Payment>.That.Matches(p => 
@@ -96,23 +96,25 @@ public class CreatePaymentCommandHandlerTests
                     && p.ExpiryMonth == createPaymentCommand.ExpiryMonth
                     && p.ExpiryYear == createPaymentCommand.ExpiryYear
                     && p.CardNumberLastFour == "**** **** **** 4567"
-                    && p.Status.ToString() == paymentStatus.ToString())))
+                    && p.Status.ToString() == bankResponse.Status.ToString()
+                    && p.Reason == bankResponse.Reason)))
             .MustHaveHappenedOnceExactly();
     }
 
     private void Then_the_response_contains_the_expected_information(CreatePaymentResponse response,
-        CreatePaymentCommand command, PaymentStatus paymentStatus)
+        CreatePaymentCommand command, BankResponse bankResponse)
     {
         Assert.Multiple(() =>
         {
             Assert.That(response, Is.Not.Null);
             Assert.That(response.Id, Is.EqualTo(command.Id));
-            Assert.That(response.PaymentStatusCode, Is.EqualTo(paymentStatus));
+            Assert.That(response.PaymentStatusCode.ToString(), Is.EqualTo(bankResponse.Status.ToString()));
             Assert.That(response.Amount, Is.EqualTo(command.Amount));
             Assert.That(response.Currency, Is.EqualTo(command.Currency));
             Assert.That(response.CardNumberLastFour, Is.EqualTo("**** **** **** 4567"));
             Assert.That(response.ExpiryMonth, Is.EqualTo(command.ExpiryMonth));
             Assert.That(response.ExpiryYear, Is.EqualTo(command.ExpiryYear));
+            Assert.That(response.Reason, Is.EqualTo(bankResponse.Reason));
         });
     }
 

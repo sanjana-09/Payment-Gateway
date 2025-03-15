@@ -54,15 +54,16 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
         }
 
 
-        [Test]
-        public async Task Returns_200_OK_when_payment_command_is_processed_successfully()
+        [TestCase(PaymentStatus.Declined, "Service Unavailable")]
+        [TestCase(PaymentStatus.Authorized, null)]
+        public async Task Returns_200_OK_when_payment_command_is_processed_successfully(PaymentStatus paymentStatus, string? reason)
         {
             // Arrange
             Given_command_validation_succeeds();
 
             var createPaymentCommand = _fixture.Create<CreatePaymentCommand>();
-            var expectedPaymentResponse = new CreatePaymentResponse(Guid.NewGuid(), PaymentStatus.Authorized, 
-                "**** **** **** 5678", 12, 2025, "USD", 1000);
+            var expectedPaymentResponse = new CreatePaymentResponse(Guid.NewGuid(), paymentStatus, 
+                "**** **** **** 5678", 12, 2025, "USD", 1000, reason);
 
             A.CallTo(() => _mediator.Send(A<CreatePaymentCommand>._, A<CancellationToken>._)).Returns(expectedPaymentResponse);
 
@@ -133,6 +134,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
                 Assert.That(returnedPaymentResponse.ExpiryYear, Is.EqualTo(expectedPaymentResponse.ExpiryYear));
                 Assert.That(returnedPaymentResponse.Currency, Is.EqualTo(expectedPaymentResponse.Currency));
                 Assert.That(returnedPaymentResponse.Amount, Is.EqualTo(expectedPaymentResponse.Amount));
+                Assert.That(returnedPaymentResponse.Reason, Is.EqualTo(expectedPaymentResponse.Reason));
             });
         }
 

@@ -25,14 +25,16 @@ namespace PaymentGateway.Api.Application.Commands
 
             try
             {
-                var bankResponse = await _bankClient.ProcessPaymentAsync(bankPaymentRequest);
-
                 var payment = CreatePayment(createPaymentCommand);
+                var bankResponse = await _bankClient.ProcessPaymentAsync(bankPaymentRequest);
 
                 if (bankResponse.Authorized)
                     payment.Authorized();
                 else
+                {
                     payment.Declined();
+                    payment.Reason = bankResponse.Reason;
+                }
 
                 await _paymentsRepository.AddAsync(payment);
 
@@ -88,7 +90,8 @@ namespace PaymentGateway.Api.Application.Commands
                 ExpiryMonth: payment.ExpiryMonth,
                 ExpiryYear: payment.ExpiryYear,
                 Currency: payment.Currency,
-                Amount: payment.Amount
+                Amount: payment.Amount,
+                Reason: payment.Reason
             );
 
         }

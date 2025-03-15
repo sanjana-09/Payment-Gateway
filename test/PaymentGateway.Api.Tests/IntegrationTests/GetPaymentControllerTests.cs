@@ -46,7 +46,8 @@ public class GetPaymentControllerTests
             Amount = _random.Next(1, 10000),
             CardNumberLastFour = $"**** **** **** **** {_random.Next(1111, 9999)}",
             Currency = "GBP",
-            Status = Payment.PaymentStatus.Authorized
+            Status = Payment.PaymentStatus.Declined,
+            Reason = "Insufficient funds"
         };
 
         await _paymentsRepository.AddAsync(payment);
@@ -83,8 +84,9 @@ public class GetPaymentControllerTests
             Assert.That(paymentResponse.ExpiryMonth, Is.EqualTo(payment.ExpiryMonth));
             Assert.That(paymentResponse.ExpiryYear, Is.EqualTo(payment.ExpiryYear));
             Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo(payment.CardNumberLastFour));
-            Assert.That(paymentResponse.PaymentStatusCode, Is.EqualTo(PaymentStatus.Authorized));
-            Assert.That(paymentResponse.Status, Is.EqualTo(PaymentStatus.Authorized.ToString()));
+            Assert.That(paymentResponse.PaymentStatusCode.ToString(), Is.EqualTo(payment.Status.ToString()));
+            Assert.That(paymentResponse.Status, Is.EqualTo(payment.Status.ToString()));
+            Assert.That(paymentResponse.Reason, Is.EqualTo(payment.Reason));
         });
     }
     #endregion

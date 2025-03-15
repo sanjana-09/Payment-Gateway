@@ -36,7 +36,8 @@ namespace PaymentGateway.Api.Application.Queries
                 ExpiryMonth: payment.ExpiryMonth,
                 ExpiryYear: payment.ExpiryYear,
                 Currency: payment.Currency,
-                Amount: payment.Amount
+                Amount: payment.Amount,
+                Reason: payment.Reason
             );
         }
     }

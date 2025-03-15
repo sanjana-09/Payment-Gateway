@@ -7,7 +7,8 @@ public record CreatePaymentResponse(
     int ExpiryMonth,
     int ExpiryYear,
     string Currency,
-    int Amount
+    int Amount,
+    string? Reason
 )
 {
     public string Status => PaymentStatusCode.ToString();
