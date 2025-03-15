@@ -14,7 +14,7 @@ namespace PaymentGateway.Api.Infrastructure
             _logger = logger;
         }
 
-        public async Task<BankResponse?> ProcessPaymentAsync(BankRequest bankRequest)
+        public async Task<BankResponse> ProcessPaymentAsync(BankRequest bankRequest)
         {
             try
             {
@@ -24,15 +24,20 @@ namespace PaymentGateway.Api.Infrastructure
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<BankResponse>();
+                    var bankResponse = await response.Content.ReadFromJsonAsync<BankResponse>();
+                    if (bankResponse != null)
+                    {
+                        bankResponse.Reason = response.ReasonPhrase;
+                        return bankResponse;
+                    }
                 }
 
-                return null;
+                return new BankResponse(Authorized: false, Authorization_Code: null) { Reason = response.ReasonPhrase };
             }
 
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to communicate with acquiring bank with the error: {ex.Message}"); 
+                _logger.LogError($"Failed to communicate with acquiring bank with the error: {ex.Message}");
                 throw ex;
             }
 

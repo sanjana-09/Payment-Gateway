@@ -29,7 +29,7 @@ namespace PaymentGateway.Api.Application.Commands
 
                 var payment = CreatePayment(createPaymentCommand);
 
-                if (bankResponse is not null && bankResponse.Authorized)
+                if (bankResponse.Authorized)
                     payment.Authorized();
                 else
                     payment.Declined();

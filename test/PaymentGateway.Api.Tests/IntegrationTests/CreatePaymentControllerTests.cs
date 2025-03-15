@@ -60,12 +60,14 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
             Assert.That(rejectedPaymentResponse.Status, Is.EqualTo(PaymentStatus.Rejected.ToString()));
         }
 
-        [Test]
-        public async Task Returns_200_OK_with_expected_payment_details_when_command_is_valid()
+        [TestCase("123456781234567", "4567",PaymentStatus.Authorized)]
+        [TestCase("123456781234568", "4568", PaymentStatus.Declined)]
+        [TestCase("123456781234560","4560",PaymentStatus.Declined)]
+        public async Task Returns_200_OK_with_expected_payment_details_when_command_is_valid(string cardNumber, string lastFour, PaymentStatus paymentStatus)
         {
             var validCommand = new CreatePaymentCommand(
                 Guid.NewGuid(),
-                "1234567812345678",
+                cardNumber,
                 12,
                 2025,
                 "USD",
@@ -81,20 +83,21 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
             var paymentResponse = await response.Content.ReadFromJsonAsync<CreatePaymentResponse>();
             Assert.That(paymentResponse, Is.Not.Null);
 
-            Then_the_response_contains_the_expected_payment_details(paymentResponse, validCommand);
+            Then_the_response_contains_the_expected_payment_details(paymentResponse, validCommand, paymentStatus, lastFour);
         }
 
         #region Helper methods
-        private void Then_the_response_contains_the_expected_payment_details(CreatePaymentResponse? paymentResponse, CreatePaymentCommand validCommand)
+        private void Then_the_response_contains_the_expected_payment_details(CreatePaymentResponse? paymentResponse, CreatePaymentCommand validCommand, PaymentStatus paymentStatus, string lastFour)
         {
             Assert.Multiple(() =>
             {
                 Assert.That(paymentResponse.Id, Is.EqualTo(validCommand.Id));
-                Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo("**** **** **** 5678"));
+                Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo($"**** **** **** {lastFour}"));
                 Assert.That(paymentResponse.ExpiryMonth, Is.EqualTo(validCommand.ExpiryMonth));
                 Assert.That(paymentResponse.ExpiryYear, Is.EqualTo(validCommand.ExpiryYear));
                 Assert.That(paymentResponse.Currency, Is.EqualTo(validCommand.Currency));
                 Assert.That(paymentResponse.Amount, Is.EqualTo(validCommand.Amount));
+                Assert.That(paymentResponse.PaymentStatusCode, Is.EqualTo(paymentStatus));
             });
         }
 

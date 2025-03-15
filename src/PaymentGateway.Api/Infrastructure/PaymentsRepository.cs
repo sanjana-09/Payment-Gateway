@@ -8,7 +8,7 @@ public class PaymentsRepository : IPaymentsRepository
 {
     public List<Payment?> Payments = new();
     
-    public async Task AddAsync(Payment? payment)
+    public async Task AddAsync(Payment payment)
     {
        Payments.Add(payment);
 

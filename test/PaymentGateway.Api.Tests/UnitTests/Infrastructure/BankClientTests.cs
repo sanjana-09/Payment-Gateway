@@ -37,7 +37,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Infrastructure
 
         [TestCase(HttpStatusCode.BadRequest)]
         [TestCase(HttpStatusCode.ServiceUnavailable)]
-        public async Task Returns_null_when_status_code_is_not_OK(HttpStatusCode statusCode)
+        public async Task Returns_declined_response_when_status_code_is_not_OK(HttpStatusCode statusCode)
         {
             var httpResponseMessage = new HttpResponseMessage(statusCode);
             A.CallTo(() => _httpClient.PostAsJsonAsync(A<string>._, _bankRequest, A<JsonSerializerOptions>._, A<CancellationToken>._)).Returns(httpResponseMessage);
@@ -56,6 +56,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Infrastructure
             {
                 Content = JsonContent.Create(bankResponse)
             };
+
             A.CallTo(() => _httpClient.PostAsJsonAsync(A<string>._, _bankRequest, A<JsonSerializerOptions>._, A<CancellationToken>._)).Returns(httpResponseMessage);
 
             var result = await _bankClient.ProcessPaymentAsync(_bankRequest);

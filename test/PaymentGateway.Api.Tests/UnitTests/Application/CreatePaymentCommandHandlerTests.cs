@@ -39,7 +39,7 @@ public class CreatePaymentCommandHandlerTests
     public async Task Returns_authorized_response_when_bank_authorizes_payment()
     {
         // Arrange
-        var bankResponse = new BankResponse(Authorized:true, Authorization_Code: "auth_code");
+        var bankResponse = new BankResponse(Authorized: true, Authorization_Code: "auth_code");
 
         A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
 
@@ -74,26 +74,6 @@ public class CreatePaymentCommandHandlerTests
         Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Declined);
     }
 
-    [Test]
-    public async Task Returns_declined_response_when_bank_response_is_null()
-    {
-        // Arrange
-        BankResponse bankResponse = null;
-
-        A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>._)).Returns(bankResponse);
-
-        // Act
-        var createPaymentResponse = await _handler.Handle(_createPaymentCommand, default);
-
-        // Assert
-        Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
-
-        Then_the_payment_is_persisted(Payment.PaymentStatus.Declined, _createPaymentCommand);
-
-        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, PaymentStatus.Declined);
-    }
-
-    
     private void Then_a_request_is_made_to_the_bank_with_expected_information(CreatePaymentCommand command)
     {
         A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>.That.Matches(br =>
