@@ -13,16 +13,20 @@ public class CreatePaymentController : Controller
 {
     private readonly IValidator<CreatePaymentCommand> _validator;
     private readonly IMediator _mediator;
+    private readonly ILogger<CreatePaymentController> _logger;
 
-    public CreatePaymentController(IValidator<CreatePaymentCommand> validator, IMediator mediator)
+    public CreatePaymentController(IValidator<CreatePaymentCommand> validator, IMediator mediator, ILogger<CreatePaymentController> logger)
     {
         _validator = validator;
         _mediator = mediator;
+        _logger = logger;
     }
 
     [HttpPost]
     public async Task<ActionResult> CreatePaymentAsync([FromBody] CreatePaymentCommand command)
     {
+        _logger.LogInformation($"CreatePayment request received for Id: {command.Id}");
+
         var validationResult = await _validator.ValidateAsync(command);
         if (!validationResult.IsValid)
         {

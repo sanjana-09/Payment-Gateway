@@ -9,15 +9,19 @@ namespace PaymentGateway.Api.Api.Controllers;
 public class GetPaymentController : Controller
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<GetPaymentController> _logger;
 
-    public GetPaymentController(IMediator mediator)
+    public GetPaymentController(IMediator mediator, ILogger<GetPaymentController> logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult> GetPaymentAsync(Guid id)
     {
+        _logger.LogInformation($"GetPayment request received for Id: {id}.");
+
         var getPaymentQuery = new GetPaymentQuery(id);
         var paymentResponse = await _mediator.Send(getPaymentQuery);
 

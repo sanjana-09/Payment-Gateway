@@ -5,6 +5,8 @@ using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
 using NUnit.Framework;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Commands;
@@ -17,6 +19,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
     { 
         private IValidator<CreatePaymentCommand> _validator;
         private IMediator _mediator;
+        private ILogger<CreatePaymentController> _logger;
         private Fixture _fixture;
 
         private CreatePaymentController _controller;
@@ -26,9 +29,11 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
         {
             _validator = A.Fake<IValidator<CreatePaymentCommand>>();
             _mediator = A.Fake<IMediator>();
+            _logger = A.Fake<ILogger<CreatePaymentController>>();
+
             _fixture = new Fixture();
 
-            _controller = new CreatePaymentController(_validator, _mediator);
+            _controller = new CreatePaymentController(_validator, _mediator, _logger);
         }
 
         [Test]

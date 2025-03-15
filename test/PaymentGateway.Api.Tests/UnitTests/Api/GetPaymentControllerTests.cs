@@ -2,6 +2,8 @@
 using FakeItEasy;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
 using NUnit.Framework;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Queries;
@@ -12,6 +14,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api;
 public class GetPaymentControllerTests
 {
     private IMediator _mediator;
+    private ILogger<GetPaymentController> _logger;
     private Fixture _fixture;
     private GetPaymentController _controller;
 
@@ -19,8 +22,9 @@ public class GetPaymentControllerTests
     public void Setup()
     {
         _mediator = A.Fake<IMediator>();
+        _logger = A.Fake<ILogger<GetPaymentController>>();
         _fixture = new Fixture();
-        _controller = new GetPaymentController(_mediator);
+        _controller = new GetPaymentController(_mediator, _logger);
     }
 
     [Test]

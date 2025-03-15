@@ -37,8 +37,14 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
         public async Task Returns_400_BadRequest_when_command_is_invalid()
         {
             // Arrange
-            var invalidCommand = new CreatePaymentCommand(Guid.Empty, "1234567890123456", 13, 
-                2020, "XYZ", -100, "123");
+            var invalidCommand = new CreatePaymentCommand(Guid.Empty, 
+                "1234567890123456", 
+                13, 
+                2020, 
+                "XYZ", 
+                -100,
+                "123");
+
             var content = new StringContent(JsonConvert.SerializeObject(invalidCommand), Encoding.UTF8, "application/json");
 
             // Act
@@ -79,8 +85,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
         }
 
         #region Helper methods
-        private void Then_the_response_contains_the_expected_payment_details(CreatePaymentResponse? paymentResponse,
-            CreatePaymentCommand validCommand)
+        private void Then_the_response_contains_the_expected_payment_details(CreatePaymentResponse? paymentResponse, CreatePaymentCommand validCommand)
         {
             Assert.Multiple(() =>
             {
