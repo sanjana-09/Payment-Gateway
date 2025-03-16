@@ -1,8 +1,11 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+
+using PaymentGateway.Api.Api.Authentication;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Queries;
 using PaymentGateway.Api.Domain.Entities;
@@ -18,6 +21,7 @@ public class GetPaymentControllerTests
     private IPaymentsRepository _paymentsRepository;
     private WebApplicationFactory<GetPaymentController> _factory;
     private HttpClient _client;
+    private string? _apiKey;
 
     [SetUp]
     public void Setup()
@@ -32,6 +36,10 @@ public class GetPaymentControllerTests
         _client = _factory.CreateClient();
 
         _paymentsRepository = _factory.Services.GetRequiredService<IPaymentsRepository>();
+        var configuration = _factory.Services.GetRequiredService<IConfiguration>();
+        _apiKey = configuration["ApiKey"];
+
+        _client.DefaultRequestHeaders.Add(Constants.ApiKeyHeaderName, _apiKey);
     }
 
     [Test]

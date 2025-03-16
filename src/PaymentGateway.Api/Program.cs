@@ -1,4 +1,8 @@
 using FluentValidation;
+
+using Microsoft.OpenApi.Models;
+
+using PaymentGateway.Api.Api.Authentication;
 using PaymentGateway.Api.Application;
 using PaymentGateway.Api.Application.Commands.Validators;
 using PaymentGateway.Api.Domain.Interfaces;
@@ -17,8 +21,33 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreatePaymentCommandValidat
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter API Key",
+        Name = Constants.ApiKeyHeaderName,
+        Type = SecuritySchemeType.ApiKey
+    });
 
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+builder.Services.AddTransient<IApiKeyValidation, ApiKeyValidation>();
 builder.Services.AddSingleton<IPaymentsRepository, PaymentsRepository>();
 builder.Services.AddSingleton<IBankClient, BankClient>();
 
@@ -35,6 +64,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseMiddleware<ApiKeyMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

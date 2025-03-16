@@ -18,6 +18,9 @@ public class GetPaymentController : Controller
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> GetPaymentAsync(Guid id)
     {
         _logger.LogInformation($"GetPayment request received for Id: {id}.");

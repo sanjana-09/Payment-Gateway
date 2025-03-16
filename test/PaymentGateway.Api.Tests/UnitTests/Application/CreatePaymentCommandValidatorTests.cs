@@ -79,7 +79,7 @@ public class CreatePaymentCommandValidatorTests
     }
 
     [Test]
-    public void Should_Not_Have_Error_When_CardNumber_Is_Valid()
+    public void Should_Pass_When_CardNumber_Is_Valid()
     {
         var model = _fixture.Build<CreatePaymentCommand>().With(x => x.CardNumber, "1234567890123456").Create();
 

@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using System.Net;
+
+using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +25,10 @@ public class CreatePaymentController : Controller
     }
 
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> CreatePaymentAsync([FromBody] CreatePaymentCommand command)
     {
         _logger.LogInformation($"CreatePayment request received for Id: {command.Id}");

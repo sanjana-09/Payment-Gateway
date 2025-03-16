@@ -2,9 +2,12 @@
 using System.Net.Http.Json;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using NUnit.Framework;
+
+using PaymentGateway.Api.Api.Authentication;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Commands.Responses;
@@ -18,6 +21,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
     {
         private WebApplicationFactory<CreatePaymentController> _factory;
         private HttpClient _client;
+        private string? _apiKey;
 
         [SetUp]
         public void Setup()
@@ -31,6 +35,11 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
                     }));
 
             _client = _factory.CreateClient();
+
+            var configuration = _factory.Services.GetRequiredService<IConfiguration>();
+            _apiKey = configuration["ApiKey"];
+
+            _client.DefaultRequestHeaders.Add(Constants.ApiKeyHeaderName, _apiKey);
         }
 
         [Test]

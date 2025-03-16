@@ -87,6 +87,8 @@ public class CreatePaymentCommandHandlerTests
         Assert.That(createPaymentResponse, Is.Null);
     }
 
+    #region Helper methods
+
     private void Then_a_request_is_made_to_the_bank_with_expected_information(CreatePaymentCommand command)
     {
         A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>.That.Matches(br =>
@@ -102,8 +104,8 @@ public class CreatePaymentCommandHandlerTests
     private void Then_the_payment_is_persisted(BankResponse bankResponse, CreatePaymentCommand createPaymentCommand)
     {
         A.CallTo(() =>
-                _paymentsRepository.AddAsync(A<Payment>.That.Matches(p => 
-                    p.Id == createPaymentCommand.Id 
+                _paymentsRepository.AddAsync(A<Payment>.That.Matches(p =>
+                    p.Id == createPaymentCommand.Id
                     && p.Amount == createPaymentCommand.Amount
                     && p.Currency == createPaymentCommand.Currency
                     && p.ExpiryMonth == createPaymentCommand.ExpiryMonth
@@ -129,6 +131,9 @@ public class CreatePaymentCommandHandlerTests
             Assert.That(response.ExpiryYear, Is.EqualTo(command.ExpiryYear));
             Assert.That(response.Reason, Is.EqualTo(bankResponse.Reason));
         });
+        
+        #endregion
+
     }
 
 }
