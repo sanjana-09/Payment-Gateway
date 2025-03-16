@@ -22,26 +22,38 @@ namespace PaymentGateway.Api.Infrastructure
 
                 _logger.LogInformation($"Bank response status code for paymentId {bankRequest.PaymentId}: {response.StatusCode}");
 
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                   var bankResponse = await response.Content.ReadFromJsonAsync<BankResponse>();
-
-                   if (bankResponse is not null)
-                   {
-                       bankResponse.Reason = response.ReasonPhrase;
-                       return bankResponse;
-                   }
+                    return DeclinedBankResponse(response);
                 }
 
-                return new BankResponse(Authorized: false, Authorization_Code: null) { Reason = response.ReasonPhrase };
+                var bankResponse = await response.Content.ReadFromJsonAsync<BankResponse>();
+
+                if (bankResponse is null)
+                {
+                    _logger.LogError("Failed to deserialize bank response.");
+                    return DeclinedBankResponse(response);
+                }
+
+                bankResponse.Reason = response.ReasonPhrase;
+                return bankResponse;
+
             }
 
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to communicate with acquiring bank with the error: {ex.Message}");
-                throw ex;
+                throw;
             }
 
+        }
+
+        private BankResponse DeclinedBankResponse(HttpResponseMessage response)
+        {
+            return new BankResponse(Authorized: false, Authorization_Code: null)
+            {
+                Reason = response.ReasonPhrase
+            };
         }
     }
 }

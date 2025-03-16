@@ -47,12 +47,12 @@ public class CreatePaymentCommandHandlerTests
         var createPaymentResponse = await _handler.Handle(_createPaymentCommand, default);
 
         // Assert
-        Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
-
-        Then_the_payment_is_persisted(bankResponse, _createPaymentCommand);
-
-        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, bankResponse);
-
+        Assert.Multiple(() =>
+        {
+            Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
+            Then_the_payment_is_persisted(bankResponse, _createPaymentCommand);
+            Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, bankResponse);
+        });
     }
 
     [Test]
@@ -67,11 +67,13 @@ public class CreatePaymentCommandHandlerTests
         var createPaymentResponse = await _handler.Handle(_createPaymentCommand, default);
 
         // Assert
-        Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
-
-        Then_the_payment_is_persisted(bankResponse, _createPaymentCommand);
-
-        Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, bankResponse);
+        Assert.Multiple(() =>
+        {
+            Assert.That(createPaymentResponse, Is.Not.Null);
+            Then_a_request_is_made_to_the_bank_with_expected_information(_createPaymentCommand);
+            Then_the_payment_is_persisted(bankResponse, _createPaymentCommand);
+            Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, bankResponse);
+        });
     }
 
     [Test]

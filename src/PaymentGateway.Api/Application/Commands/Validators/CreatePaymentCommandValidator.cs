@@ -24,7 +24,6 @@ public class CreatePaymentCommandValidator : AbstractValidator<CreatePaymentComm
                 RuleFor(x => x.ExpiryMonth).InclusiveBetween(1, 12).WithMessage("Expiry month must be between 1 and 12");
             });
 
-
         RuleFor(x => x.ExpiryYear)
             .NotEmpty().WithMessage("Expiry year is required")
             .DependentRules(() =>

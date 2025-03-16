@@ -6,7 +6,7 @@ namespace PaymentGateway.Api.Infrastructure;
 public class PaymentsRepository : IPaymentsRepository
 
 {
-    public List<Payment?> Payments = new();
+    public List<Payment> Payments = new();
     
     public async Task AddAsync(Payment payment)
     {
