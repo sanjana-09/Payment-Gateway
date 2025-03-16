@@ -42,6 +42,30 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
             _client.DefaultRequestHeaders.Add(Constants.ApiKeyHeaderName, _apiKey);
         }
 
+        [TestCase("")]
+        [TestCase(null)]
+        [TestCase("wrong key")]
+        public async Task Returns_401_Unauthorized_when_api_key_is_missing_or_invalid(string? invalidApiKey)
+        {
+            var validCommand = new CreatePaymentCommand(
+                Guid.NewGuid(),
+                "123456781234567",
+                12,
+                2025,
+                "USD",
+                100,
+                "123"
+            );
+
+            var content = new StringContent(JsonConvert.SerializeObject(validCommand), Encoding.UTF8, "application/json");
+            _client.DefaultRequestHeaders.Remove(Constants.ApiKeyHeaderName);
+            _client.DefaultRequestHeaders.Add(Constants.ApiKeyHeaderName, invalidApiKey);
+
+            var response = await _client.PostAsync("/api/CreatePayment", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+        }
+
         [Test]
         public async Task Returns_400_BadRequest_when_command_is_invalid()
         {
@@ -60,7 +84,6 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
             var response = await _client.PostAsync("/api/CreatePayment", content);
 
             // Assert
-
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             var rejectedPaymentResponse = await response.Content.ReadFromJsonAsync<RejectedPaymentResponse>();
 
@@ -73,6 +96,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
         [TestCase("123456781234568", "4568", PaymentStatus.Declined)]
         public async Task Returns_200_OK_with_expected_payment_details_when_command_is_valid(string cardNumber, string lastFour, PaymentStatus paymentStatus)
         {
+            //Arrange
             var validCommand = new CreatePaymentCommand(
                 Guid.NewGuid(),
                 cardNumber,
@@ -85,13 +109,21 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
 
             var content = new StringContent(JsonConvert.SerializeObject(validCommand), Encoding.UTF8, "application/json");
 
+            //Act
             var response = await _client.PostAsync("/api/CreatePayment", content);
 
+            //Assert
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             var paymentResponse = await response.Content.ReadFromJsonAsync<CreatePaymentResponse>();
             Assert.That(paymentResponse, Is.Not.Null);
 
             Then_the_response_contains_the_expected_payment_details(paymentResponse, validCommand, paymentStatus, lastFour);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _factory.Dispose();
         }
 
         #region Helper methods

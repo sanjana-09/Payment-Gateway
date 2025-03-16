@@ -42,8 +42,24 @@ public class GetPaymentControllerTests
         _client.DefaultRequestHeaders.Add(Constants.ApiKeyHeaderName, _apiKey);
     }
 
+    [TestCase("")]
+    [TestCase(null)]
+    [TestCase("wrong key")]
+    public async Task Returns_401_Unauthorized_when_api_key_is_missing_or_invalid(string? invalidApiKey)
+    {
+        // Arrange
+        _client.DefaultRequestHeaders.Remove(Constants.ApiKeyHeaderName);
+        _client.DefaultRequestHeaders.Add(Constants.ApiKeyHeaderName, invalidApiKey);
+
+        // Act
+        var response = await _client.GetAsync($"/api/GetPayment/{Guid.NewGuid()}");
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
+
     [Test]
-    public async Task RetrievesAPaymentSuccessfully()
+    public async Task Retrieves_a_payment_successfully()
     {
         // Arrange
         var payment = new Payment()
@@ -71,13 +87,19 @@ public class GetPaymentControllerTests
     }
 
     [Test]
-    public async Task Returns404IfPaymentNotFound()
+    public async Task Returns_404_if_payment_not_found()
     {
         // Act
         var response = await _client.GetAsync($"/api/GetPayment/{Guid.NewGuid()}");
 
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _factory.Dispose();
     }
 
     #region Helper methods
