@@ -31,10 +31,9 @@ namespace PaymentGateway.Api.Application.Commands
                 if (bankResponse.Authorized)
                     payment.Authorized();
                 else
-                {
                     payment.Declined();
-                    payment.Reason = bankResponse.Reason;
-                }
+
+                payment.Reason = bankResponse.Reason;
 
                 await _paymentsRepository.AddAsync(payment);
 

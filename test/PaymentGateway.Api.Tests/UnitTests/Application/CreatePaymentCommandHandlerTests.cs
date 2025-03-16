@@ -74,6 +74,19 @@ public class CreatePaymentCommandHandlerTests
         Then_the_response_contains_the_expected_information(createPaymentResponse, _createPaymentCommand, bankResponse);
     }
 
+    [Test]
+    public async Task Returns_null_when_exception_is_thrown()
+    {
+        // Arrange
+        A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>._)).Throws<Exception>();
+
+        // Act
+        var createPaymentResponse = await _handler.Handle(_createPaymentCommand, default);
+
+        // Assert
+        Assert.That(createPaymentResponse, Is.Null);
+    }
+
     private void Then_a_request_is_made_to_the_bank_with_expected_information(CreatePaymentCommand command)
     {
         A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>.That.Matches(br =>

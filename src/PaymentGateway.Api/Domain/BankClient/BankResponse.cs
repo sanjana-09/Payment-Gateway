@@ -6,6 +6,7 @@ public record BankResponse(
 )
 {
     public string? Reason;
+
     public BankResponseStatus Status => Authorized ? BankResponseStatus.Authorized : BankResponseStatus.Declined;
 }
 

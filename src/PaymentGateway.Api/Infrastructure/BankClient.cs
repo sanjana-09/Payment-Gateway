@@ -26,8 +26,11 @@ namespace PaymentGateway.Api.Infrastructure
                 {
                    var bankResponse = await response.Content.ReadFromJsonAsync<BankResponse>();
 
-                   if(bankResponse is not null)
+                   if (bankResponse is not null)
+                   {
+                       bankResponse.Reason = response.ReasonPhrase;
                        return bankResponse;
+                   }
                 }
 
                 return new BankResponse(Authorized: false, Authorization_Code: null) { Reason = response.ReasonPhrase };

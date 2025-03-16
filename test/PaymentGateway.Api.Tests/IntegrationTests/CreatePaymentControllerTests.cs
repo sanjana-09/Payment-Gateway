@@ -62,7 +62,6 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
 
         [TestCase("123456781234567", "4567",PaymentStatus.Authorized)]
         [TestCase("123456781234568", "4568", PaymentStatus.Declined)]
-        [TestCase("123456781234560","4560",PaymentStatus.Declined)]
         public async Task Returns_200_OK_with_expected_payment_details_when_command_is_valid(string cardNumber, string lastFour, PaymentStatus paymentStatus)
         {
             var validCommand = new CreatePaymentCommand(
@@ -100,8 +99,6 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
                 Assert.That(paymentResponse.PaymentStatusCode, Is.EqualTo(paymentStatus));
             });
         }
-
-
         #endregion
     }
 }

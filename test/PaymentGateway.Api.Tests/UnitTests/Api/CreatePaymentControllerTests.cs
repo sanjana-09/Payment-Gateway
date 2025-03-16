@@ -55,7 +55,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
 
 
         [TestCase(PaymentStatus.Declined, "Service Unavailable")]
-        [TestCase(PaymentStatus.Authorized, null)]
+        [TestCase(PaymentStatus.Authorized, "OK")]
         public async Task Returns_200_OK_when_payment_command_is_processed_successfully(PaymentStatus paymentStatus, string? reason)
         {
             // Arrange
