@@ -42,7 +42,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "ApiKey"
                 }
             },
-            new string[] {}
+            []
         }
     });
 });

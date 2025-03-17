@@ -25,9 +25,9 @@ namespace PaymentGateway.Api.Application.Commands
 
             try
             {
-                var payment = CreatePayment(createPaymentCommand);
-
                 var bankResponse = await _bankClient.ProcessPaymentAsync(bankPaymentRequest);
+
+                var payment = CreatePayment(createPaymentCommand);
 
                 if (bankResponse.Authorized)
                     payment.Authorized();

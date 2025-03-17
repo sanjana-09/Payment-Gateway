@@ -120,6 +120,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
             Then_the_response_contains_the_expected_payment_details(paymentResponse, validCommand, paymentStatus, lastFour);
         }
 
+
         [TearDown]
         public void TearDown()
         {

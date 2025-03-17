@@ -12,7 +12,6 @@ public record CreatePaymentResponse(
 )
 {
     public string Status => PaymentStatusCode.ToString();
-
 }
 
 public enum PaymentStatus

@@ -11,6 +11,9 @@ using NUnit.Framework;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Commands.Responses;
+using PaymentGateway.Api.Application.Queries;
+
+using PaymentStatus = PaymentGateway.Api.Application.Commands.Responses.PaymentStatus;
 
 namespace PaymentGateway.Api.Tests.UnitTests.Api
 {
@@ -34,6 +37,10 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             _fixture = new Fixture();
 
             _controller = new CreatePaymentController(_validator, _mediator, _logger);
+
+            //set up requests to be non-duplicate by default
+            GetPaymentResponse? nullResponse = null;
+            A.CallTo(() => _mediator.Send(A<GetPaymentQuery>._, A<CancellationToken>._))!.Returns(nullResponse);
         }
 
         [Test]
@@ -94,6 +101,26 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             Then_a_500_InternalServerError_is_returned(result);
         }
 
+        [Test]
+        public async Task Returns_existing_payment_when_duplicate_request_is_made()
+        {
+            // Arrange
+            Given_command_validation_succeeds();
+            var createPaymentCommand = _fixture.Create<CreatePaymentCommand>();
+            var existingPayment = _fixture.Build<GetPaymentResponse>().With(r => r.Id, createPaymentCommand.Id).Create();
+
+            A.CallTo(() => _mediator.Send(A<GetPaymentQuery>._, A<CancellationToken>._)).Returns(existingPayment);
+
+            // Act
+            var result = await _controller.CreatePaymentAsync(createPaymentCommand);
+
+            // Assert
+            A.CallTo(() => _mediator.Send(createPaymentCommand, A<CancellationToken>._)).MustNotHaveHappened();
+            var okResult = result as OkObjectResult;
+            Assert.That(okResult, Is.Not.Null);
+            Assert.That(okResult.Value, Is.EqualTo(existingPayment));
+        }
+
         #region Helper Methods
         private void Given_command_validation_fails()
         {
@@ -107,7 +134,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             A.CallTo(() => _validator.ValidateAsync(A<CreatePaymentCommand>._, A<CancellationToken>._)).Returns(validationResult);
         }
 
-        private void Then_400_bad_request_with_rejected_payment_response_is_returned(ActionResult result)
+        private void Then_400_bad_request_with_rejected_payment_response_is_returned(ActionResult? result)
         {
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
             var badRequestResult = result as BadRequestObjectResult;
@@ -138,7 +165,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             });
         }
 
-        private void Then_a_500_InternalServerError_is_returned(ActionResult result)
+        private void Then_a_500_InternalServerError_is_returned(ActionResult? result)
         {
             Assert.That(result, Is.InstanceOf<ObjectResult>());
             var actionResult = result as ObjectResult;

@@ -1,11 +1,11 @@
-﻿using System.Net;
-
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Commands.Responses;
+using PaymentGateway.Api.Application.Queries;
+using PaymentGateway.Api.Domain.Interfaces;
 
 namespace PaymentGateway.Api.Api.Controllers;
 
@@ -37,6 +37,13 @@ public class CreatePaymentController : Controller
         if (!validationResult.IsValid)
         {
             return RejectedPaymentResponse(validationResult, command.Id);
+        }
+
+        var existingPayment = await _mediator.Send(new GetPaymentQuery(command.Id));
+        if (existingPayment is not null)
+        {
+            _logger.LogInformation($"Payment with Id: {command.Id} already exists. Returning existing payment.");
+            return new OkObjectResult(existingPayment);
         }
 
         var paymentResponse = await _mediator.Send(command);
