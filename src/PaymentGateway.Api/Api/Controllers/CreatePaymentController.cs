@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using PaymentGateway.Api.Application.Commands;
 using PaymentGateway.Api.Application.Commands.Responses;
 using PaymentGateway.Api.Application.Queries;
-using PaymentGateway.Api.Domain.Interfaces;
 
 namespace PaymentGateway.Api.Api.Controllers;
 

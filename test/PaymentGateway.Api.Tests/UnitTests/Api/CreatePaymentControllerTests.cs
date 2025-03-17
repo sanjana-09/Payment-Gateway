@@ -1,5 +1,4 @@
 ﻿using AutoFixture;
-
 using FakeItEasy;
 using FluentValidation;
 using FluentValidation.Results;

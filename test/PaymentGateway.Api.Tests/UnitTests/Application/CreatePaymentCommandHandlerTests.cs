@@ -90,7 +90,6 @@ public class CreatePaymentCommandHandlerTests
     }
 
     #region Helper methods
-
     private void Then_a_request_is_made_to_the_bank_with_expected_information(CreatePaymentCommand command)
     {
         A.CallTo(() => _bankClient.ProcessPaymentAsync(A<BankRequest>.That.Matches(br =>

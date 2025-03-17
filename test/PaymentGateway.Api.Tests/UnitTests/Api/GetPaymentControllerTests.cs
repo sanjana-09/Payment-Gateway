@@ -3,7 +3,6 @@ using FakeItEasy;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-
 using NUnit.Framework;
 using PaymentGateway.Api.Api.Controllers;
 using PaymentGateway.Api.Application.Queries;
