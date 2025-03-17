@@ -89,7 +89,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
 
             Assert.That(rejectedPaymentResponse, Is.Not.Null);
             Assert.That(rejectedPaymentResponse.Errors, Is.Not.Empty);
-            Assert.That(rejectedPaymentResponse.Status, Is.EqualTo(PaymentStatus.Rejected.ToString()));
+            Assert.That(rejectedPaymentResponse.PaymentStatus, Is.EqualTo(PaymentStatus.Rejected.ToString()));
         }
 
         [TestCase("123456781234567", "4567",PaymentStatus.Authorized)]
@@ -139,6 +139,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
                 Assert.That(paymentResponse.Currency, Is.EqualTo(validCommand.Currency));
                 Assert.That(paymentResponse.Amount, Is.EqualTo(validCommand.Amount));
                 Assert.That(paymentResponse.PaymentStatusCode, Is.EqualTo(paymentStatus));
+                Assert.That(paymentResponse.PaymentStatus, Is.EqualTo(paymentStatus.ToString()));
             });
         }
         #endregion

@@ -11,7 +11,7 @@ public record GetPaymentResponse(
     string? Reason
 )
 {
-    public string Status => PaymentStatusCode.ToString();
+    public string PaymentStatus => PaymentStatusCode.ToString();
 }
 
 public enum PaymentStatus

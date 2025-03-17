@@ -2,6 +2,6 @@
 
 public record RejectedPaymentResponse(Guid Id, IEnumerable<string> Errors)
 {
-    public PaymentStatus PaymentStatusCode => PaymentStatus.Rejected;
-    public string Status => PaymentStatusCode.ToString();
+    public PaymentStatus PaymentStatusCode => Responses.PaymentStatus.Rejected;
+    public string PaymentStatus => PaymentStatusCode.ToString();
 }

@@ -43,7 +43,7 @@ namespace PaymentGateway.Api.Application.Commands
 
             catch (Exception ex)
             {
-                _logger.Log(LogLevel.Error, $"Payment processing failed with the error: {ex.Message}");
+                _logger.Log(LogLevel.Error, $"PaymentStatus processing failed with the error: {ex.Message}");
                 return null;
             }
 

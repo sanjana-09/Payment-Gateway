@@ -143,7 +143,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             var rejectedPaymentResponse = badRequestResult.Value as RejectedPaymentResponse;
 
             Assert.That(rejectedPaymentResponse.Errors, Is.Not.Empty);
-            Assert.That(rejectedPaymentResponse.Status, Is.EqualTo(PaymentStatus.Rejected.ToString()));
+            Assert.That(rejectedPaymentResponse.PaymentStatus, Is.EqualTo(PaymentStatus.Rejected.ToString()));
         }
 
         private void Then_200_OK_with_with_expected_payment_information_is_returned(ActionResult? result, CreatePaymentResponse expectedPaymentResponse)
@@ -155,7 +155,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
                 var returnedPaymentResponse = okResult.Value as CreatePaymentResponse;
                 Assert.That(returnedPaymentResponse, Is.Not.Null);
                 Assert.That(returnedPaymentResponse.Id, Is.EqualTo(expectedPaymentResponse.Id));
-                Assert.That(returnedPaymentResponse.Status, Is.EqualTo(expectedPaymentResponse.Status));
+                Assert.That(returnedPaymentResponse.PaymentStatus, Is.EqualTo(expectedPaymentResponse.PaymentStatus));
                 Assert.That(returnedPaymentResponse.CardNumberLastFour, Is.EqualTo(expectedPaymentResponse.CardNumberLastFour));
                 Assert.That(returnedPaymentResponse.ExpiryMonth, Is.EqualTo(expectedPaymentResponse.ExpiryMonth));
                 Assert.That(returnedPaymentResponse.ExpiryYear, Is.EqualTo(expectedPaymentResponse.ExpiryYear));

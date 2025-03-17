@@ -42,7 +42,7 @@ public class CreatePaymentController : Controller
         var existingPayment = await _mediator.Send(new GetPaymentQuery(command.Id));
         if (existingPayment is not null)
         {
-            _logger.LogInformation($"Payment with Id: {command.Id} already exists. Returning existing payment.");
+            _logger.LogInformation($"PaymentStatus with Id: {command.Id} already exists. Returning existing payment.");
             return new OkObjectResult(existingPayment);
         }
 

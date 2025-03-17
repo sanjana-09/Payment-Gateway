@@ -115,7 +115,7 @@ public class GetPaymentControllerTests
             Assert.That(paymentResponse.ExpiryYear, Is.EqualTo(payment.ExpiryYear));
             Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo(payment.CardNumberLastFour));
             Assert.That(paymentResponse.PaymentStatusCode.ToString(), Is.EqualTo(payment.Status.ToString()));
-            Assert.That(paymentResponse.Status, Is.EqualTo(payment.Status.ToString()));
+            Assert.That(paymentResponse.PaymentStatus, Is.EqualTo(payment.Status.ToString()));
             Assert.That(paymentResponse.Reason, Is.EqualTo(payment.Reason));
         });
     }
