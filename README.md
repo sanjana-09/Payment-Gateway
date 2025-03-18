@@ -27,6 +27,8 @@ The project depends on the following frameworks and packages.
 
 - Run `dotnet test` from within the `payment-gateway-challenge-dotnet` directory to run unit and integration tests.
 
+_N.B._ _Some integration tests will fail after a delay if the Bank Simulator is not running._
+
 ## Local Run
 
 - Run `dotnet run` from within the `payment-gateway-challenge-dotnet\src\PaymentGateway.Api` directory. This will launch the project on port 7092 (https). Navigate to <https://localhost:7092/swagger/index.html> to use the Swagger UI.
@@ -39,7 +41,7 @@ The project depends on the following frameworks and packages.
 
 Use the 'Authorize' button in Swagger to input the following API key.
 
-Api Key: eOWSopHkGDm8DzFzlI998QZdFf6E9GNE43PVsfp38J5fCfX00374hXTqIscnKsc0 (in reality this will not be hard-coded but will be retrieved from a secure key vault / auth server!)
+Api Key: `eOWSopHkGDm8DzFzlI998QZdFf6E9GNE43PVsfp38J5fCfX00374hXTqIscnKsc0` (in reality this will not be hard-coded but will be retrieved from a secure key vault / auth server!)
 
 Valid Request
 
