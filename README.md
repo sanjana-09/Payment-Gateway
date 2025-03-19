@@ -39,9 +39,7 @@ _N.B._ _Some integration tests will fail after a delay if the Bank Simulator is 
 
 **POST /api/CreatePayment**
 
-Use the 'Authorize' button in Swagger to input the following API key.
-
-Api Key: `eOWSopHkGDm8DzFzlI998QZdFf6E9GNE43PVsfp38J5fCfX00374hXTqIscnKsc0` (in reality this will not be hard-coded but will be retrieved from a secure key vault / auth server!)
+Use the 'Authorize' button in Swagger to input the API key in `appsettings.json`.
 
 Valid Request
 
