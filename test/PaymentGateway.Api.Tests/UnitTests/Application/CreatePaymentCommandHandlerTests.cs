@@ -123,7 +123,7 @@ public class CreatePaymentCommandHandlerTests
         Assert.Multiple(() =>
         {
             Assert.That(response, Is.Not.Null);
-            Assert.That(response.Id, Is.EqualTo(command.Id));
+            Assert.That(response!.Id, Is.EqualTo(command.Id));
             Assert.That(response.PaymentStatusCode.ToString(), Is.EqualTo(bankResponse.Status.ToString()));
             Assert.That(response.Amount, Is.EqualTo(command.Amount));
             Assert.That(response.Currency, Is.EqualTo(command.Currency));

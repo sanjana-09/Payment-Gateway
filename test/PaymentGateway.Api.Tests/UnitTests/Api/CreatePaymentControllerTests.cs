@@ -38,7 +38,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             _controller = new CreatePaymentController(_validator, _mediator, _logger);
 
             //set up requests to be non-duplicate by default
-            GetPaymentResponse? nullResponse = null;
+            GetPaymentResponse nullResponse = null;
             A.CallTo(() => _mediator.Send(A<GetPaymentQuery>._, A<CancellationToken>._))!.Returns(nullResponse);
         }
 
@@ -62,7 +62,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
 
         [TestCase(PaymentStatus.Declined, "Service Unavailable")]
         [TestCase(PaymentStatus.Authorized, "OK")]
-        public async Task Returns_200_OK_when_payment_command_is_processed_successfully(PaymentStatus paymentStatus, string? reason)
+        public async Task Returns_200_OK_when_payment_command_is_processed_successfully(PaymentStatus paymentStatus, string reason)
         {
             // Arrange
             Given_command_validation_succeeds();
@@ -88,7 +88,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             Given_command_validation_succeeds();
 
             var createPaymentCommand = _fixture.Create<CreatePaymentCommand>();
-            CreatePaymentResponse? nullResponse = null;
+            CreatePaymentResponse nullResponse = null;
 
             A.CallTo(() => _mediator.Send(A<CreatePaymentCommand>._, A<CancellationToken>._))!.Returns(nullResponse);
 
@@ -117,7 +117,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             A.CallTo(() => _mediator.Send(createPaymentCommand, A<CancellationToken>._)).MustNotHaveHappened();
             var okResult = result as OkObjectResult;
             Assert.That(okResult, Is.Not.Null);
-            Assert.That(okResult.Value, Is.EqualTo(existingPayment));
+            Assert.That(okResult!.Value, Is.EqualTo(existingPayment));
         }
 
         #region Helper Methods
@@ -133,27 +133,27 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             A.CallTo(() => _validator.ValidateAsync(A<CreatePaymentCommand>._, A<CancellationToken>._)).Returns(validationResult);
         }
 
-        private void Then_400_bad_request_with_rejected_payment_response_is_returned(ActionResult? result)
+        private void Then_400_bad_request_with_rejected_payment_response_is_returned(ActionResult result)
         {
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
             var badRequestResult = result as BadRequestObjectResult;
 
-            Assert.That(badRequestResult.Value, Is.InstanceOf<RejectedPaymentResponse>());
+            Assert.That(badRequestResult!.Value, Is.InstanceOf<RejectedPaymentResponse>());
             var rejectedPaymentResponse = badRequestResult.Value as RejectedPaymentResponse;
 
-            Assert.That(rejectedPaymentResponse.Errors, Is.Not.Empty);
+            Assert.That(rejectedPaymentResponse!.Errors, Is.Not.Empty);
             Assert.That(rejectedPaymentResponse.PaymentStatus, Is.EqualTo(PaymentStatus.Rejected.ToString()));
         }
 
-        private void Then_200_OK_with_with_expected_payment_information_is_returned(ActionResult? result, CreatePaymentResponse expectedPaymentResponse)
+        private void Then_200_OK_with_with_expected_payment_information_is_returned(ActionResult result, CreatePaymentResponse expectedPaymentResponse)
         {
             Assert.That(result, Is.InstanceOf<OkObjectResult>());
             var okResult = result as OkObjectResult;
             Assert.Multiple(() =>
             {
-                var returnedPaymentResponse = okResult.Value as CreatePaymentResponse;
+                var returnedPaymentResponse = okResult!.Value as CreatePaymentResponse;
                 Assert.That(returnedPaymentResponse, Is.Not.Null);
-                Assert.That(returnedPaymentResponse.Id, Is.EqualTo(expectedPaymentResponse.Id));
+                Assert.That(returnedPaymentResponse!.Id, Is.EqualTo(expectedPaymentResponse.Id));
                 Assert.That(returnedPaymentResponse.PaymentStatus, Is.EqualTo(expectedPaymentResponse.PaymentStatus));
                 Assert.That(returnedPaymentResponse.CardNumberLastFour, Is.EqualTo(expectedPaymentResponse.CardNumberLastFour));
                 Assert.That(returnedPaymentResponse.ExpiryMonth, Is.EqualTo(expectedPaymentResponse.ExpiryMonth));
@@ -164,11 +164,11 @@ namespace PaymentGateway.Api.Tests.UnitTests.Api
             });
         }
 
-        private void Then_a_500_InternalServerError_is_returned(ActionResult? result)
+        private void Then_a_500_InternalServerError_is_returned(ActionResult result)
         {
             Assert.That(result, Is.InstanceOf<ObjectResult>());
             var actionResult = result as ObjectResult;
-            Assert.That(actionResult.StatusCode, Is.EqualTo(500));
+            Assert.That(actionResult!.StatusCode, Is.EqualTo(500));
         }
 
         #endregion

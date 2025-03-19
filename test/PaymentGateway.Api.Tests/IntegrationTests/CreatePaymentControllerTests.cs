@@ -21,7 +21,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
     {
         private WebApplicationFactory<CreatePaymentController> _factory;
         private HttpClient _client;
-        private string? _apiKey;
+        private string _apiKey;
 
         [SetUp]
         public void Setup()
@@ -45,7 +45,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
         [TestCase("")]
         [TestCase(null)]
         [TestCase("wrong key")]
-        public async Task Returns_401_Unauthorized_when_api_key_is_missing_or_invalid(string? invalidApiKey)
+        public async Task Returns_401_Unauthorized_when_api_key_is_missing_or_invalid(string invalidApiKey)
         {
             var validCommand = new CreatePaymentCommand(
                 Guid.NewGuid(),
@@ -88,7 +88,7 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
             var rejectedPaymentResponse = await response.Content.ReadFromJsonAsync<RejectedPaymentResponse>();
 
             Assert.That(rejectedPaymentResponse, Is.Not.Null);
-            Assert.That(rejectedPaymentResponse.Errors, Is.Not.Empty);
+            Assert.That(rejectedPaymentResponse!.Errors, Is.Not.Empty);
             Assert.That(rejectedPaymentResponse.PaymentStatus, Is.EqualTo(PaymentStatus.Rejected.ToString()));
         }
 
@@ -128,11 +128,11 @@ namespace PaymentGateway.Api.Tests.IntegrationTests
         }
 
         #region Helper methods
-        private void Then_the_response_contains_the_expected_payment_details(CreatePaymentResponse? paymentResponse, CreatePaymentCommand validCommand, PaymentStatus paymentStatus, string lastFour)
+        private void Then_the_response_contains_the_expected_payment_details(CreatePaymentResponse paymentResponse, CreatePaymentCommand validCommand, PaymentStatus paymentStatus, string lastFour)
         {
             Assert.Multiple(() =>
             {
-                Assert.That(paymentResponse.Id, Is.EqualTo(validCommand.Id));
+                Assert.That(paymentResponse!.Id, Is.EqualTo(validCommand.Id));
                 Assert.That(paymentResponse.CardNumberLastFour, Is.EqualTo($"**** **** **** {lastFour}"));
                 Assert.That(paymentResponse.ExpiryMonth, Is.EqualTo(validCommand.ExpiryMonth));
                 Assert.That(paymentResponse.ExpiryYear, Is.EqualTo(validCommand.ExpiryYear));

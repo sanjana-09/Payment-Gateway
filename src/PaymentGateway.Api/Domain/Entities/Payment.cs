@@ -4,10 +4,10 @@ public class Payment
 {
     public Guid Id { get; set; }
     public PaymentStatus Status { get; set; }
-    public string CardNumberLastFour { get; set; }
+    public string CardNumberLastFour { get; set; } = null!;
     public int ExpiryMonth { get; set; }
     public int ExpiryYear { get; set; }
-    public string Currency { get; set; }
+    public string Currency { get; set; } = null!;
     public int Amount { get; set; }
     public string? Reason { get; set; }
 

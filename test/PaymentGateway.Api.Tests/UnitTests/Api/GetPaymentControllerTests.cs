@@ -44,14 +44,14 @@ public class GetPaymentControllerTests
 
         Assert.That(result, Is.InstanceOf<OkObjectResult>());
         var okResult = result as OkObjectResult;
-        Assert.That(okResult.Value, Is.EqualTo(expectedResponse));
+        Assert.That(okResult!.Value, Is.EqualTo(expectedResponse));
     }
 
     [Test]
     public async Task Returns_404_when_payment_does_not_exist()
     {
         //Arrange
-        GetPaymentResponse? response = null;
+        GetPaymentResponse response = null;
 
         var paymentId = Guid.NewGuid();
 

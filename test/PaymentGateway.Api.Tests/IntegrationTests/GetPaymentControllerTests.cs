@@ -21,7 +21,7 @@ public class GetPaymentControllerTests
     private IPaymentsRepository _paymentsRepository;
     private WebApplicationFactory<GetPaymentController> _factory;
     private HttpClient _client;
-    private string? _apiKey;
+    private string _apiKey;
 
     [SetUp]
     public void Setup()
@@ -45,7 +45,7 @@ public class GetPaymentControllerTests
     [TestCase("")]
     [TestCase(null)]
     [TestCase("wrong key")]
-    public async Task Returns_401_Unauthorized_when_api_key_is_missing_or_invalid(string? invalidApiKey)
+    public async Task Returns_401_Unauthorized_when_api_key_is_missing_or_invalid(string invalidApiKey)
     {
         // Arrange
         _client.DefaultRequestHeaders.Remove(Constants.ApiKeyHeaderName);
@@ -104,7 +104,7 @@ public class GetPaymentControllerTests
 
     #region Helper methods
     private void Then_the_response_contains_the_expected_details(
-        GetPaymentResponse? paymentResponse, Payment payment)
+        GetPaymentResponse paymentResponse, Payment payment)
     {
         Assert.Multiple(() =>
         {

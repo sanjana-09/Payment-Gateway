@@ -137,6 +137,8 @@ The API follows the principles of Clean Architecture, where dependencies flow in
 
 - `FluentValidation` is used for strongly-typed validation on the incoming request. When the request fails validation, a 400 error response is returned with status 'Rejected' alongside error messages. No call is made to the Bank Simulator and no payment is persisted.
 
+  _N.B If the request body is empty or entirely missing string fields, .NET's default model binding will trigger and a 400 error will be returned with error messages for the missing string fields (ints and Guids will default to 0 and Guid.Empty)_
+
 - When the Bank Simulator returns a non-200 response, the payment is treated as 'Declined' and the payment is persisted.
 
 - When the Bank Simulator returns a 200 OK with unauthorized response, the payment is treated as 'Declined' and the payment is persisted.

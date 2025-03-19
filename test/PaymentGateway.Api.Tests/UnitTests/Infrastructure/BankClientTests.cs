@@ -54,7 +54,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Infrastructure
 
         [TestCase(true, "AUTH123", BankResponseStatus.Authorized)]
         [TestCase(false,null, BankResponseStatus.Declined)]
-        public async Task Returns_appropriate_bank_response_when_response_is_OK(bool authorized, string? authCode, BankResponseStatus bankResponseStatus)
+        public async Task Returns_appropriate_bank_response_when_response_is_OK(bool authorized, string authCode, BankResponseStatus bankResponseStatus)
         {
             //Arrange
             var expectedBankResponse = new BankResponse(authorized, authCode);
@@ -87,7 +87,7 @@ namespace PaymentGateway.Api.Tests.UnitTests.Infrastructure
                     A<HttpRequestMessage>.Ignored, A<CancellationToken>.Ignored))
                 .Returns(httpResponseMessage);
 
-            HttpClient? httpClient = new(handler);
+            HttpClient httpClient = new(handler);
             httpClient.BaseAddress = new Uri("http://mockedbaseuri");
             return httpClient;
         
